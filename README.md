@@ -319,8 +319,8 @@ Example output: **Predicted Final Score = 83.7 / 100**, with an indicator (Good 
 ### Installation
 
 ```bash
-git clone <repository-url>
-cd react-edu-predict
+git clone https://github.com/SDLC-EduPredict/reactjs-edu-predict.git 
+cd reactjs-edu-predict
 
 npm install
 
