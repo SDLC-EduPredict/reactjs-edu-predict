@@ -9,12 +9,21 @@ export interface AuthState {
   sessionExpired: boolean;
 }
 
+const normalizeUser = (user: AuthUser | null): AuthUser | null =>
+  user
+    ? {
+        ...user,
+        role: String(user.role ?? '').toUpperCase().replace(/\s+/g, '_') as AuthUser['role'],
+        permissions: Array.isArray(user.permissions) ? user.permissions : [],
+      }
+    : null;
+
 const persisted = tokenStorage.load();
 
 const initialState: AuthState = {
   accessToken: persisted.accessToken,
   refreshToken: persisted.refreshToken,
-  user: persisted.user,
+  user: normalizeUser(persisted.user),
   sessionExpired: false,
 };
 
@@ -28,7 +37,7 @@ const authSlice = createSlice({
     ) {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
-      state.user = action.payload.user;
+      state.user = normalizeUser(action.payload.user);
       state.sessionExpired = false;
     },
     tokensRefreshed(state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) {
@@ -36,7 +45,7 @@ const authSlice = createSlice({
       state.refreshToken = action.payload.refreshToken;
     },
     userUpdated(state, action: PayloadAction<AuthUser>) {
-      state.user = action.payload;
+      state.user = normalizeUser(action.payload);
     },
     loggedOut(state) {
       state.accessToken = null;

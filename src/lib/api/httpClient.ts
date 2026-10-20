@@ -2,7 +2,7 @@ import axios, { AxiosHeaders, type AxiosError, type InternalAxiosRequestConfig }
 import { API_BASE_URL, env } from '@/config/env';
 import type { AppDispatch, RootState } from '@/app/store/store';
 import { sessionExpired, tokensRefreshed } from '@/features/auth/store/authSlice';
-import type { RefreshResponse } from '@/features/auth/types';
+import { normalizeAuthResponse } from '@/features/auth/api/normalizeAuth';
 import { ENDPOINTS } from './endpoints';
 
 interface StoreLike {
@@ -54,15 +54,14 @@ const refreshAccessToken = async (): Promise<string | null> => {
   const refreshToken = storeRef?.getState().auth.refreshToken;
   if (!refreshToken) return null;
   try {
-    const { data } = await axios.post<RefreshResponse>(
+    const { data } = await axios.post<unknown>(
       `${API_BASE_URL}${ENDPOINTS.auth.refresh}`,
       { refresh_token: refreshToken },
       { timeout: env.apiTimeoutMs },
     );
-    storeRef?.dispatch(
-      tokensRefreshed({ accessToken: data.access_token, refreshToken: data.refresh_token }),
-    );
-    return data.access_token;
+    const tokens = normalizeAuthResponse(data);
+    storeRef?.dispatch(tokensRefreshed({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }));
+    return tokens.accessToken;
   } catch {
     return null;
   }

@@ -54,8 +54,8 @@ export const useLogin = (redirectTo?: string | null) => {
       queryClient.clear();
       dispatch(
         credentialsReceived({
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
           user: response.user,
         }),
       );
