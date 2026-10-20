@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+  --color-brand-950: #1e1b4b;
+
+  --color-page: #f8fafc;
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --shadow-lift: 0 18px 40px -18px rgb(79 70 229 / 0.35);
+
+  --animate-toast-in: toast-in 220ms ease-out;
+  --animate-fade-in: fade-in 180ms ease-out;
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-page text-slate-800 font-sans;
+  }
+  ::selection {
+    @apply bg-brand-600 text-white;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-600 via-violet-600 to-brand-700 bg-clip-text text-transparent;
+  }
+  .footer-gradient {
+    background:
+      radial-gradient(60rem 22rem at 85% 110%, rgb(196 181 253 / 0.45), transparent 70%),
+      radial-gradient(40rem 18rem at 10% 100%, rgb(165 180 252 / 0.35), transparent 70%),
+      linear-gradient(180deg, var(--color-page) 0%, #eef2ff 22%, #e0e7ff 58%, #ede9fe 100%);
+  }
+  .portal-footer-gradient {
+    background: linear-gradient(90deg, #f8fafc 0%, #eef2ff 45%, #f5f3ff 100%);
+  }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

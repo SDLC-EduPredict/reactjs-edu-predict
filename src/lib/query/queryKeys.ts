@@ -1,0 +1,71 @@
+import type { QueryParams } from '@/types';
+
+export const queryKeys = {
+  auth: {
+    me: ['auth', 'me'] as const,
+  },
+  catalog: {
+    all: ['catalog'] as const,
+    categories: ['catalog', 'categories'] as const,
+    courses: (params: QueryParams) => ['catalog', 'courses', params] as const,
+    course: (idOrSlug: string | number) => ['catalog', 'course', String(idOrSlug)] as const,
+    faculty: (params: QueryParams) => ['catalog', 'faculty', params] as const,
+    facultyMember: (id: string) => ['catalog', 'faculty-member', id] as const,
+  },
+  facultyPortal: {
+    profile: ['faculty', 'profile'] as const,
+    dashboard: ['faculty', 'dashboard'] as const,
+    students: (params: QueryParams) => ['faculty', 'students', params] as const,
+    student: (id: string | number) => ['faculty', 'student', String(id)] as const,
+  },
+  studentPortal: {
+    all: ['student'] as const,
+    profile: ['student', 'profile'] as const,
+    courses: ['student', 'courses'] as const,
+    attendance: (params: QueryParams) => ['student', 'attendance', params] as const,
+    assignments: (params: QueryParams) => ['student', 'assignments', params] as const,
+    results: (params: QueryParams) => ['student', 'results', params] as const,
+    performance: ['student', 'performance'] as const,
+  },
+  admin: {
+    dashboard: ['admin', 'dashboard'] as const,
+    faculty: (params: QueryParams) => ['admin', 'faculty', params] as const,
+    facultyAll: ['admin', 'faculty'] as const,
+    facultyMember: (id: string | number) => ['admin', 'faculty-member', String(id)] as const,
+    students: (params: QueryParams) => ['admin', 'students', params] as const,
+    studentsAll: ['admin', 'students'] as const,
+    student: (id: string | number) => ['admin', 'student', String(id)] as const,
+    categories: ['admin', 'categories'] as const,
+    courses: (params: QueryParams) => ['admin', 'courses', params] as const,
+    coursesAll: ['admin', 'courses'] as const,
+    enrolments: (params: QueryParams) => ['admin', 'enrolments', params] as const,
+    enrolmentsAll: ['admin', 'enrolments'] as const,
+    notifications: (params: QueryParams) => ['admin', 'notifications', params] as const,
+    notificationsAll: ['admin', 'notifications'] as const,
+  },
+  academics: {
+    attendance: (params: QueryParams) => ['academics', 'attendance', params] as const,
+    attendanceAll: ['academics', 'attendance'] as const,
+    assignments: (params: QueryParams) => ['academics', 'assignments', params] as const,
+    assignmentsAll: ['academics', 'assignments'] as const,
+    submissions: (assignmentId: number) => ['academics', 'submissions', assignmentId] as const,
+    assessments: (params: QueryParams) => ['academics', 'assessments', params] as const,
+    assessmentsAll: ['academics', 'assessments'] as const,
+    assessmentResults: (assessmentId: number) => ['academics', 'assessment-results', assessmentId] as const,
+    performance: (params: QueryParams) => ['academics', 'performance', params] as const,
+  },
+  ml: {
+    prediction: (studentId: string | number) => ['ml', 'prediction', String(studentId)] as const,
+  },
+  notifications: {
+    all: ['notifications'] as const,
+    list: (params: QueryParams) => ['notifications', 'list', params] as const,
+    unreadCount: ['notifications', 'unread-count'] as const,
+  },
+  reports: {
+    overview: ['reports', 'overview'] as const,
+    coursePerformance: ['reports', 'course-performance'] as const,
+    studentsNeedingAttention: ['reports', 'students-needing-attention'] as const,
+    predictionDistribution: ['reports', 'prediction-distribution'] as const,
+  },
+} as const;
