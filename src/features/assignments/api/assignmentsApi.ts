@@ -5,26 +5,31 @@ import type {
   Assignment,
   AssignmentListParams,
   AssignmentPayload,
-  GradeSubmissionPayload,
-  SubmitAssignmentPayload,
+  GradePayload,
+  StudentAssignmentsCourse,
+  SubmissionsData,
   Submission,
+  SubmitPayload,
 } from '../types';
 
 export const assignmentsApi = {
-  mine: (params: QueryParams) => api.get<unknown>(ENDPOINTS.student.assignments, params),
-  submit: ({ assignmentId, ...payload }: SubmitAssignmentPayload & { assignmentId: number }) =>
+  mine: () => api.get<{ courses: StudentAssignmentsCourse[] }>(ENDPOINTS.student.assignments),
+  submit: ({ assignmentId, ...payload }: SubmitPayload & { assignmentId: number }) =>
     api.post<{ submission: Submission }>(
       ENDPOINTS.student.submitAssignment(assignmentId),
-      payload.file instanceof File ? toFormData(payload) : { submission_text: payload.submission_text },
+      payload.submission_file
+        ? toFormData({ ...payload })
+        : { submission_text: payload.submission_text, submission_link: payload.submission_link },
     ),
   list: (params: AssignmentListParams) =>
-    api.get<Paginated<Assignment>>(ENDPOINTS.academics.assignments, params as QueryParams),
+    api.get<Paginated<Assignment>>(ENDPOINTS.assignments.list, params as QueryParams),
+  detail: (id: number) => api.get<{ assignment: Assignment }>(ENDPOINTS.assignments.detail(id)),
   create: (payload: AssignmentPayload) =>
-    api.post<{ assignment: Assignment }, AssignmentPayload>(ENDPOINTS.academics.assignments, payload),
+    api.post<{ assignment: Assignment }, AssignmentPayload>(ENDPOINTS.assignments.list, payload),
   update: ({ id, ...payload }: Partial<AssignmentPayload> & { id: number }) =>
-    api.patch<{ assignment: Assignment }>(ENDPOINTS.academics.assignment(id), payload),
-  remove: (id: number) => api.delete(ENDPOINTS.academics.assignment(id)),
-  submissions: (assignmentId: number) => api.get<unknown>(ENDPOINTS.academics.assignmentSubmissions(assignmentId)),
-  grade: ({ id, ...payload }: GradeSubmissionPayload & { id: number }) =>
-    api.post<{ submission: Submission }, GradeSubmissionPayload>(ENDPOINTS.academics.gradeSubmission(id), payload),
+    api.patch<{ assignment: Assignment }>(ENDPOINTS.assignments.detail(id), payload),
+  remove: (id: number) => api.delete(ENDPOINTS.assignments.detail(id)),
+  submissions: (id: number) => api.get<SubmissionsData>(ENDPOINTS.assignments.submissions(id)),
+  grade: ({ id, ...payload }: GradePayload & { id: number }) =>
+    api.post<{ submissions: Submission[] }, GradePayload>(ENDPOINTS.assignments.submissions(id), payload),
 };

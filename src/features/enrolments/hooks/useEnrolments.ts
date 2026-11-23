@@ -1,63 +1,83 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { asList } from '@/lib/api/normalize';
 import { queryKeys } from '@/lib/query/queryKeys';
 import type { QueryParams } from '@/types';
 import { enrolmentsApi } from '../api/enrolmentsApi';
-import type { Enrolment, EnrolmentListParams } from '../types';
+import type { EnrolmentListParams } from '../types';
 
-export const useMyEnrolments = (enabled = true) =>
+export const useMyCourses = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.studentPortal.courses,
     queryFn: enrolmentsApi.myCourses,
     enabled,
-    select: (result) => asList<Enrolment>(result.data, ['enrolments', 'courses']),
+    select: (result) => result.data.courses,
+  });
+
+export const useMyCourse = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.studentPortal.course(id ?? 0),
+    queryFn: () => enrolmentsApi.myCourse(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.enrolment,
   });
 
 export const useEnrol = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: enrolmentsApi.enrol,
-    meta: { successMessage: 'Enrolment request submitted', errorTitle: 'Could not enrol' },
+    meta: { successMessage: 'You are enrolled!', errorTitle: 'Could not enrol' },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.studentPortal.all }),
   });
 };
 
-export const useAdminEnrolments = (params: EnrolmentListParams) =>
+export const useEnrolments = (params: EnrolmentListParams, enabled = true) =>
   useQuery({
-    queryKey: queryKeys.admin.enrolments(params as QueryParams),
-    queryFn: () => enrolmentsApi.adminList(params),
+    queryKey: queryKeys.enrolments.list(params as QueryParams),
+    queryFn: () => enrolmentsApi.list(params),
+    enabled,
     placeholderData: keepPreviousData,
     select: (result) => result.data,
   });
 
-const useInvalidateEnrolments = () => {
+export const useEnrolment = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.enrolments.detail(id ?? 0),
+    queryFn: () => enrolmentsApi.detail(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.enrolment,
+  });
+
+const useInvalidate = () => {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: queryKeys.admin.enrolmentsAll });
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.enrolments.all }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.dashboard }),
+    ]);
 };
 
-export const useAdminCreateEnrolment = () => {
-  const invalidate = useInvalidateEnrolments();
+export const useCreateEnrolment = () => {
+  const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: enrolmentsApi.adminCreate,
-    meta: { successMessage: 'Student enrolled', errorTitle: 'Could not enrol student' },
+    mutationFn: enrolmentsApi.create,
+    meta: { successMessage: 'Enrolment created', errorTitle: 'Could not create enrolment' },
     onSuccess: invalidate,
   });
 };
 
-export const useAdminUpdateEnrolment = () => {
-  const invalidate = useInvalidateEnrolments();
+export const useUpdateEnrolment = () => {
+  const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: enrolmentsApi.adminUpdate,
+    mutationFn: enrolmentsApi.update,
     meta: { successMessage: 'Enrolment updated', errorTitle: 'Could not update enrolment' },
     onSuccess: invalidate,
   });
 };
 
-export const useAdminRemoveEnrolment = () => {
-  const invalidate = useInvalidateEnrolments();
+export const useDeleteEnrolment = () => {
+  const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: enrolmentsApi.adminRemove,
-    meta: { successMessage: 'Enrolment removed', errorTitle: 'Could not remove enrolment' },
+    mutationFn: enrolmentsApi.remove,
+    meta: { successMessage: 'Enrolment deleted', errorTitle: 'Could not delete enrolment' },
     onSuccess: invalidate,
   });
 };

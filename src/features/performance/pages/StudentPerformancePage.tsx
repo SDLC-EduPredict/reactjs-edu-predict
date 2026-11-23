@@ -1,101 +1,97 @@
-import { TrendingUp } from 'lucide-react';
-import { Card, CardBody, CardHeader, EmptyState, ErrorState, PageHeader, ProgressBar, Skeleton } from '@/components/ui';
+import { Activity, Award, BookOpen, CalendarCheck2 } from 'lucide-react';
+import { Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
 import { FeatureRadar, SimpleBarChart } from '@/components/charts/Charts';
-import { getErrorMessage } from '@/lib/api/apiError';
+import { IndicatorBadge } from '@/components/domain/IndicatorBadge';
+import { fmtPct, fmtScore, Kpi, Meter } from '@/components/domain/Metric';
+import { QueryView } from '@/components/domain/QueryView';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
-import { formatDate, formatNumber, humanize } from '@/lib/utils/format';
-import { IndicatorBadge } from '../components/IndicatorBadge';
+import { formatDate } from '@/lib/utils/format';
 import { useMyPerformance } from '../hooks/usePerformance';
-import type { PerformanceSnapshot } from '../types';
 
-const METRICS: { key: keyof PerformanceSnapshot; label: string }[] = [
-  { key: 'attendance_percentage', label: 'Attendance' },
-  { key: 'assignment_average', label: 'Assignments' },
-  { key: 'mock_test_average', label: 'Mock tests' },
-  { key: 'previous_score', label: 'Previous score' },
-  { key: 'modules_completed', label: 'Modules' },
-];
-
-const valueOf = (row: PerformanceSnapshot, key: keyof PerformanceSnapshot): number => {
-  const value = row[key];
-  return typeof value === 'number' ? value : 0;
-};
-
-export const StudentPerformancePage = () => {
-  useDocumentTitle('Academic performance');
+const StudentPerformancePage = () => {
+  useDocumentTitle('My Performance');
   const performance = useMyPerformance();
-
-  if (performance.isError) return <ErrorState message={getErrorMessage(performance.error)} onRetry={() => performance.refetch()} />;
-
   return (
-    <div className="space-y-6">
-      <PageHeader eyebrow="Insights" title="Academic performance" description="Your attendance, assignment and assessment indicators combined per course." />
-      {performance.isPending ? (
-        <Skeleton className="h-80" />
-      ) : performance.data.length === 0 ? (
-        <Card>
-          <EmptyState icon={<TrendingUp className="h-6 w-6" />} title="No performance data yet" description="Indicators appear once attendance and marks are recorded." />
-        </Card>
-      ) : (
-        <>
-          {performance.data.length > 1 && (
-            <Card>
-              <CardHeader title="Course comparison" />
-              <div className="p-4">
-                <SimpleBarChart
-                  data={performance.data.map((row) => ({
-                    course: (row.course?.title ?? 'Course').slice(0, 14),
-                    attendance: valueOf(row, 'attendance_percentage'),
-                    assignments: valueOf(row, 'assignment_average'),
-                    tests: valueOf(row, 'mock_test_average'),
-                  }))}
-                  xKey="course"
-                  series={[
-                    { key: 'attendance', label: 'Attendance %' },
-                    { key: 'assignments', label: 'Assignment avg' },
-                    { key: 'tests', label: 'Mock test avg' },
-                  ]}
-                  domain={[0, 100]}
-                />
-              </div>
-            </Card>
-          )}
-          {performance.data.map((row, index) => (
-            <Card key={row.id ?? row.course?.id ?? index}>
-              <CardHeader
-                title={row.course?.title ?? 'Overall performance'}
-                description={row.updated_at ? `Updated ${formatDate(row.updated_at, true)}` : undefined}
-                action={<IndicatorBadge indicator={row.indicator} label={row.indicator_display} />}
-              />
-              <CardBody className="grid gap-6 lg:grid-cols-2">
-                <div className="space-y-4">
-                  {METRICS.map((metric) => (
-                    <div key={metric.key}>
-                      <div className="mb-1.5 flex justify-between text-xs">
-                        <span className="font-semibold text-slate-600">{metric.label}</span>
-                        <span className="font-bold text-slate-900">{formatNumber(valueOf(row, metric.key), 1)}</span>
-                      </div>
-                      <ProgressBar value={valueOf(row, metric.key)} />
-                    </div>
-                  ))}
-                  <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
-                    <div className="rounded-xl bg-slate-50 px-3 py-2">
-                      <p className="text-slate-500">Practice hours / week</p>
-                      <p className="font-bold text-slate-900">{formatNumber(row.practice_hours_per_week, 0)} h</p>
-                    </div>
-                    <div className="rounded-xl bg-slate-50 px-3 py-2">
-                      <p className="text-slate-500">Class participation</p>
-                      <p className="font-bold text-slate-900">{humanize(row.class_participation) || '—'}</p>
-                    </div>
-                  </div>
+    <>
+      <PageHeader eyebrow="Intelligence" title="My Performance" description="Your consolidated academic index, built from attendance, coursework and tests." />
+      <QueryView query={performance}>
+        {({ overall, courses }) => (
+          <div className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <Kpi label="Overall score" value={fmtScore(overall.overall_score)} tone="navy" icon={<Award className="h-4 w-4" />} hint={<IndicatorBadge indicator={overall.indicator} label={overall.indicator_display} />} />
+              <Kpi label="Attendance" value={fmtPct(overall.attendance_percentage)} tone="lime" icon={<CalendarCheck2 className="h-4 w-4" />} />
+              <Kpi label="Assessments avg" value={fmtScore(overall.assessment_average)} tone="sun" icon={<Activity className="h-4 w-4" />} />
+              <Kpi label="Courses tracked" value={overall.courses} icon={<BookOpen className="h-4 w-4" />} />
+            </div>
+            {courses.length === 0 ? (
+              <EmptyState title="No performance records yet" description="Enrol in a course to start building your academic index." />
+            ) : (
+              <>
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <Card>
+                    <CardHeader title="Skill profile" description="Overall metrics on a 0–100 scale" />
+                    <CardBody>
+                      <FeatureRadar
+                        data={[
+                          { feature: 'Attendance', value: overall.attendance_percentage ?? 0 },
+                          { feature: 'Assignments', value: overall.assignment_average ?? 0 },
+                          { feature: 'Mock tests', value: overall.mock_test_average ?? 0 },
+                          { feature: 'Exams', value: overall.exam_average ?? 0 },
+                          { feature: 'Modules', value: overall.modules_completed_percentage ?? 0 },
+                          { feature: 'Previous', value: overall.previous_score ?? 0 },
+                        ]}
+                      />
+                    </CardBody>
+                  </Card>
+                  <Card>
+                    <CardHeader title="Course comparison" description="Overall score per course" />
+                    <CardBody>
+                      <SimpleBarChart
+                        data={courses.map((item) => ({ course: item.course.title, overall: item.performance.overall_score, attendance: item.performance.attendance_percentage }))}
+                        xKey="course"
+                        series={[
+                          { key: 'overall', label: 'Overall score' },
+                          { key: 'attendance', label: 'Attendance %', color: '#9fd356' },
+                        ]}
+                        domain={[0, 100]}
+                      />
+                    </CardBody>
+                  </Card>
                 </div>
-                <FeatureRadar data={METRICS.map((metric) => ({ feature: metric.label, value: valueOf(row, metric.key) }))} />
-              </CardBody>
-            </Card>
-          ))}
-        </>
-      )}
-    </div>
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {courses.map(({ enrolment_id, course, performance: p }) => (
+                    <Card key={enrolment_id}>
+                      <CardHeader title={course.title} description={`Updated ${formatDate(p.calculated_at, true)}`} action={<IndicatorBadge indicator={p.indicator} label={p.indicator_display} />} />
+                      <CardBody className="space-y-4">
+                        <Meter label="Attendance" value={p.attendance_percentage} suffix="%" />
+                        <Meter label="Assignment average" value={p.assignment_average} />
+                        <Meter label="Mock test average" value={p.mock_test_average} />
+                        <Meter label="Exam average" value={p.exam_average} />
+                        <Meter label={`Modules completed (${p.modules_completed ?? 0}/${p.total_modules})`} value={p.modules_completed_percentage} suffix="%" />
+                        <div className="grid grid-cols-3 gap-3 pt-2 text-center">
+                          <div className="rounded-2xl bg-slate-50 p-3">
+                            <p className="text-[11px] text-slate-500">Practice hrs</p>
+                            <p className="font-display text-lg font-bold">{fmtScore(p.practice_hours)}</p>
+                          </div>
+                          <div className="rounded-2xl bg-slate-50 p-3">
+                            <p className="text-[11px] text-slate-500">Participation</p>
+                            <p className="font-display text-lg font-bold">{p.participation_display || '—'}</p>
+                          </div>
+                          <div className="rounded-2xl bg-brand-50 p-3">
+                            <p className="text-[11px] text-brand-700">Overall</p>
+                            <p className="font-display text-lg font-bold text-brand-700">{fmtScore(p.overall_score)}</p>
+                          </div>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </QueryView>
+    </>
   );
 };
 

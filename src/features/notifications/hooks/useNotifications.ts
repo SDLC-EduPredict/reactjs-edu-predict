@@ -5,7 +5,7 @@ import { selectIsAuthenticated } from '@/features/auth/store/selectors';
 import { queryKeys } from '@/lib/query/queryKeys';
 import type { QueryParams } from '@/types';
 import { notificationsApi } from '../api/notificationsApi';
-import type { NotificationListParams } from '../types';
+import type { AdminNotificationListParams, NotificationListParams } from '../types';
 
 export const useNotifications = (params: NotificationListParams) =>
   useQuery({
@@ -13,6 +13,14 @@ export const useNotifications = (params: NotificationListParams) =>
     queryFn: () => notificationsApi.list(params),
     placeholderData: keepPreviousData,
     select: (result) => result.data,
+  });
+
+export const useNotification = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.notifications.detail(id ?? 0),
+    queryFn: () => notificationsApi.detail(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.notification,
   });
 
 export const useUnreadCount = () => {
@@ -26,57 +34,57 @@ export const useUnreadCount = () => {
   });
 };
 
-const useInvalidateNotifications = () => {
+const useInvalidate = () => {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
 };
 
-export const useMarkNotificationRead = () => {
-  const invalidate = useInvalidateNotifications();
+export const useMarkRead = () => {
+  const invalidate = useInvalidate();
   return useMutation({ mutationFn: notificationsApi.markRead, meta: { silent: true }, onSuccess: invalidate });
 };
 
-export const useMarkAllNotificationsRead = () => {
-  const invalidate = useInvalidateNotifications();
+export const useReadAll = () => {
+  const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: notificationsApi.markAllRead,
+    mutationFn: notificationsApi.readAll,
     meta: { successMessage: 'All notifications marked as read' },
     onSuccess: invalidate,
   });
 };
 
 export const useDeleteNotification = () => {
-  const invalidate = useInvalidateNotifications();
+  const invalidate = useInvalidate();
   return useMutation({
     mutationFn: notificationsApi.remove,
-    meta: { successMessage: 'Notification removed' },
+    meta: { successMessage: 'Notification deleted' },
     onSuccess: invalidate,
   });
 };
 
-export const useAdminNotifications = (params: QueryParams, enabled = true) =>
+export const useAdminNotifications = (params: AdminNotificationListParams, enabled = true) =>
   useQuery({
-    queryKey: queryKeys.admin.notifications(params),
-    enabled,
+    queryKey: queryKeys.admin.notifications(params as QueryParams),
     queryFn: () => notificationsApi.adminList(params),
+    enabled,
     placeholderData: keepPreviousData,
     select: (result) => result.data,
   });
 
-export const useBroadcastNotification = () => {
+export const useSendNotification = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: notificationsApi.broadcast,
-    meta: { successMessage: 'Notification sent', errorTitle: 'Could not send notification' },
+    mutationFn: notificationsApi.send,
+    meta: { errorTitle: 'Could not send notification' },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.admin.notificationsAll }),
   });
 };
 
-export const useDeleteBroadcast = () => {
+export const useDeleteAdminNotification = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: notificationsApi.adminRemove,
-    meta: { successMessage: 'Notification deleted' },
+    meta: { successMessage: 'Notification deleted', errorTitle: 'Could not delete notification' },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.admin.notificationsAll }),
   });
 };

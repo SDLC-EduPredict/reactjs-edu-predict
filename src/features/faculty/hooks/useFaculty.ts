@@ -12,7 +12,7 @@ export const usePublicFaculty = (params: ListParams) =>
     select: (result) => result.data,
   });
 
-export const usePublicFacultyMember = (id: string | undefined) =>
+export const usePublicFacultyMember = (id: string | null | undefined) =>
   useQuery({
     queryKey: queryKeys.catalog.facultyMember(id ?? ''),
     queryFn: () => facultyApi.publicDetail(id ?? ''),
@@ -32,7 +32,7 @@ export const useUpdateFacultyProfile = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: facultyApi.updateProfile,
-    meta: { successMessage: 'Faculty profile updated', errorTitle: 'Could not update faculty profile' },
+    meta: { successMessage: 'Faculty profile updated', errorTitle: 'Could not update profile' },
     onSuccess: (result) => {
       queryClient.setQueryData(queryKeys.facultyPortal.profile, result);
       return queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
@@ -40,12 +40,21 @@ export const useUpdateFacultyProfile = () => {
   });
 };
 
-export const useAdminFaculty = (params: FacultyListParams) =>
+export const useAdminFaculty = (params: FacultyListParams, enabled = true) =>
   useQuery({
     queryKey: queryKeys.admin.faculty(params as QueryParams),
     queryFn: () => facultyApi.adminList(params),
+    enabled,
     placeholderData: keepPreviousData,
     select: (result) => result.data,
+  });
+
+export const useAdminFacultyMember = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.admin.facultyMember(id ?? 0),
+    queryFn: () => facultyApi.adminDetail(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.faculty,
   });
 
 const useFacultyInvalidation = () => {
@@ -53,6 +62,7 @@ const useFacultyInvalidation = () => {
   return () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.facultyAll }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.dashboard }),
       queryClient.invalidateQueries({ queryKey: queryKeys.catalog.all }),
     ]);
 };

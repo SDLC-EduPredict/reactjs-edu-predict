@@ -1,73 +1,58 @@
-import { Card, CardHeader, ErrorState, PageHeader, Skeleton } from '@/components/ui';
-import { SimpleLineChart } from '@/components/charts/Charts';
-import { useAppSelector } from '@/app/store/hooks';
-import { getErrorMessage } from '@/lib/api/apiError';
+import { useState } from 'react';
+import { Info } from 'lucide-react';
+import { Alert, EmptyState, PageHeader, Select } from '@/components/ui';
+import { QueryView } from '@/components/domain/QueryView';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
-import { formatDate } from '@/lib/utils/format';
-import { useOwnStudentProfile } from '@/features/students/hooks/useStudents';
-import { useMyPerformance } from '@/features/performance/hooks/usePerformance';
+import { useMyCourses } from '@/features/enrolments/hooks/useEnrolments';
 import { PredictionCard } from '../components/PredictionCard';
-import { WhatIfSimulator } from '../components/WhatIfSimulator';
-import { useStudentPrediction } from '../hooks/usePredictions';
-import { selectLastPrediction } from '../store/predictionSlice';
+import { useMyPredictions } from '../hooks/usePredictions';
 
-export const StudentPredictionPage = () => {
-  useDocumentTitle('Predicted score');
-  const profile = useOwnStudentProfile();
-  const prediction = useStudentPrediction(profile.data?.id);
-  const performance = useMyPerformance();
-  const lastResult = useAppSelector(selectLastPrediction);
-  const latestPerformance = performance.data?.[0];
+const StudentPredictionPage = () => {
+  useDocumentTitle('ML Score Predictor');
+  const [course, setCourse] = useState('');
+  const courses = useMyCourses();
+  const predictions = useMyPredictions(course ? Number(course) : undefined);
 
   return (
-    <div className="space-y-6">
-      <PageHeader eyebrow="Insights" title="Predicted final score" description="Your expected final score estimated by the Linear Regression model from your academic indicators." />
-      {profile.isError ? (
-        <ErrorState message={getErrorMessage(profile.error)} onRetry={() => profile.refetch()} />
-      ) : prediction.isPending && profile.data ? (
-        <Skeleton className="h-72" />
-      ) : prediction.isError ? (
-        <ErrorState message={getErrorMessage(prediction.error)} onRetry={() => prediction.refetch()} />
-      ) : (
-        <PredictionCard prediction={prediction.data?.latest ?? null} title="My latest prediction" />
-      )}
-      <div className="grid gap-6 xl:grid-cols-2">
-        <WhatIfSimulator
-          studentId={profile.data?.id}
-          currentFeatures={
-            latestPerformance
-              ? {
-                  attendance_percentage: latestPerformance.attendance_percentage,
-                  assignment_average: latestPerformance.assignment_average,
-                  mock_test_average: latestPerformance.mock_test_average,
-                  practice_hours_per_week: latestPerformance.practice_hours_per_week,
-                  previous_score: latestPerformance.previous_score,
-                  modules_completed: latestPerformance.modules_completed,
-                }
-              : null
-          }
-        />
-        {lastResult ? (
-          <PredictionCard prediction={lastResult} title="Simulation result" />
-        ) : (
-          <Card>
-            <CardHeader title="Prediction history" description="How your predicted score has changed over time" />
-            <div className="p-4">
-              {prediction.data && prediction.data.history.length > 1 ? (
-                <SimpleLineChart
-                  data={[...prediction.data.history].reverse().map((item) => ({ date: formatDate(item.created_at), score: item.predicted_score }))}
-                  xKey="date"
-                  series={[{ key: 'score', label: 'Predicted score' }]}
-                  domain={[0, 100]}
-                />
-              ) : (
-                <p className="py-16 text-center text-xs text-slate-400">Run the simulator or wait for more predictions to see a trend.</p>
-              )}
-            </div>
-          </Card>
+    <>
+      <PageHeader
+        eyebrow="Intelligence"
+        title="ML Score Predictor"
+        description="Your predicted final score per course, calculated by the active Linear Regression model."
+        actions={
+          <Select
+            aria-label="Course"
+            containerClassName="w-60"
+            value={course}
+            onChange={(event) => setCourse(event.target.value)}
+            placeholder="All my courses"
+            options={(courses.data ?? []).map((item) => ({ value: item.course.id, label: item.course.title }))}
+          />
+        }
+      />
+      <QueryView query={predictions}>
+        {(data) => (
+          <div className="space-y-6">
+            {data.note && (
+              <Alert tone="info" title="How this works">
+                <span className="flex gap-2">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0" /> {data.note}
+                </span>
+              </Alert>
+            )}
+            {data.courses.length === 0 ? (
+              <EmptyState title="No predictions yet" description="Predictions appear once you are enrolled and some academic data is recorded." />
+            ) : (
+              <div className="grid gap-6 xl:grid-cols-2">
+                {data.courses.map((item) => (
+                  <PredictionCard key={item.enrolment_id} item={item} />
+                ))}
+              </div>
+            )}
+          </div>
         )}
-      </div>
-    </div>
+      </QueryView>
+    </>
   );
 };
 

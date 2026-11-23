@@ -7,25 +7,28 @@ import {
   BrainCircuit,
   CalendarCheck2,
   ClipboardList,
+  Cpu,
   FileText,
   FolderTree,
   GraduationCap,
-  LayoutDashboard,
+  Inbox,
+  LayoutGrid,
+  LineChart,
+  Megaphone,
   Settings,
-  TrendingUp,
   UserRound,
   Users,
   UsersRound,
 } from 'lucide-react';
-import { PATHS } from '@/app/router/paths';
-import type { UserRole } from '@/types';
+import { PATHS, type PortalKind } from '@/app/router/paths';
+
+export type BadgeKey = 'unread' | 'pendingAssignments' | 'courses' | 'attendance' | 'toGrade' | 'pendingFaculty' | 'attention';
 
 export interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
-  roles?: readonly UserRole[];
-  permission?: string;
+  badge?: BadgeKey;
 }
 
 export interface NavSection {
@@ -33,87 +36,98 @@ export interface NavSection {
   items: NavItem[];
 }
 
-const ADMINS: readonly UserRole[] = ['ADMIN', 'SUPER_ADMIN'];
-
-export const STUDENT_NAV: NavSection[] = [
+const STUDENT_NAV: NavSection[] = [
   {
-    title: 'Overview',
+    title: 'Student Workspace',
     items: [
-      { to: PATHS.student.dashboard, label: 'Dashboard', icon: LayoutDashboard },
-      { to: PATHS.student.profile, label: 'My Profile', icon: UserRound },
-      { to: PATHS.student.courses, label: 'My Courses', icon: BookOpen },
-    ],
-  },
-  {
-    title: 'Academics',
-    items: [
-      { to: PATHS.student.attendance, label: 'Attendance', icon: CalendarCheck2 },
-      { to: PATHS.student.assignments, label: 'Assignments', icon: FileText },
+      { to: PATHS.student.dashboard, label: 'Overview Dashboard', icon: LayoutGrid },
+      { to: PATHS.student.courses, label: 'My Courses', icon: BookOpen, badge: 'courses' },
+      { to: PATHS.student.attendance, label: 'Attendance', icon: CalendarCheck2, badge: 'attendance' },
+      { to: PATHS.student.assignments, label: 'Assignments', icon: FileText, badge: 'pendingAssignments' },
       { to: PATHS.student.results, label: 'Tests & Results', icon: Award },
     ],
   },
   {
-    title: 'Insights',
+    title: 'Intelligence & Account',
     items: [
-      { to: PATHS.student.performance, label: 'Performance', icon: TrendingUp },
-      { to: PATHS.student.prediction, label: 'Predicted Score', icon: BrainCircuit },
-      { to: PATHS.student.notifications, label: 'Notifications', icon: Bell },
+      { to: PATHS.student.performance, label: 'My Performance', icon: LineChart },
+      { to: PATHS.student.prediction, label: 'ML Score Predictor', icon: BrainCircuit },
+      { to: PATHS.student.notifications, label: 'Notifications', icon: Bell, badge: 'unread' },
+      { to: PATHS.student.profile, label: 'Student Profile', icon: UserRound },
     ],
   },
 ];
 
-export const STAFF_NAV: NavSection[] = [
+const FACULTY_NAV: NavSection[] = [
   {
-    title: 'Overview',
-    items: [{ to: PATHS.admin.dashboard, label: 'Dashboard', icon: LayoutDashboard }],
+    title: 'Faculty Workspace',
+    items: [
+      { to: PATHS.faculty_portal.dashboard, label: 'Overview Dashboard', icon: LayoutGrid },
+      { to: PATHS.faculty_portal.batches, label: 'My Batches', icon: BookOpen, badge: 'courses' },
+      { to: PATHS.faculty_portal.attendance, label: 'Student Attendance', icon: CalendarCheck2, badge: 'attendance' },
+      { to: PATHS.faculty_portal.assignments, label: 'Assignments', icon: FileText, badge: 'toGrade' },
+      { to: PATHS.faculty_portal.assessments, label: 'Assessments & Marks', icon: Award },
+      { to: PATHS.faculty_portal.students, label: 'My Students', icon: Users, badge: 'attention' },
+    ],
   },
   {
-    title: 'Management',
+    title: 'Intelligence & Account',
     items: [
-      { to: PATHS.admin.students, label: 'Students', icon: Users, roles: ADMINS },
-      { to: PATHS.admin.faculty, label: 'Faculty', icon: UsersRound, roles: ADMINS },
-      { to: PATHS.admin.courses, label: 'Courses', icon: GraduationCap, roles: ADMINS },
-      { to: PATHS.admin.categories, label: 'Categories', icon: FolderTree, roles: ADMINS },
-      { to: PATHS.admin.enrolments, label: 'Enrolments', icon: ClipboardList, roles: ADMINS },
+      { to: PATHS.faculty_portal.performance, label: 'Performance Tracking', icon: LineChart },
+      { to: PATHS.faculty_portal.predictions, label: 'ML Score Predictor', icon: BrainCircuit },
+      { to: PATHS.faculty_portal.notifications, label: 'Notifications', icon: Bell, badge: 'unread' },
+      { to: PATHS.faculty_portal.profile, label: 'Faculty Profile', icon: UserRound },
+    ],
+  },
+];
+
+const ADMIN_NAV: NavSection[] = [
+  {
+    title: 'Administration',
+    items: [
+      { to: PATHS.admin.dashboard, label: 'Overview Dashboard', icon: LayoutGrid },
+      { to: PATHS.admin.students, label: 'Students', icon: Users },
+      { to: PATHS.admin.faculty, label: 'Faculty', icon: UsersRound, badge: 'pendingFaculty' },
+      { to: PATHS.admin.categories, label: 'Categories', icon: FolderTree },
+      { to: PATHS.admin.courses, label: 'Courses', icon: GraduationCap },
+      { to: PATHS.admin.enrolments, label: 'Enrolments', icon: ClipboardList },
     ],
   },
   {
     title: 'Academics',
     items: [
       { to: PATHS.admin.attendance, label: 'Attendance', icon: CalendarCheck2 },
-      { to: PATHS.admin.assignments, label: 'Assignments', icon: FileText },
+      { to: PATHS.admin.assignments, label: 'Assignments', icon: FileText, badge: 'toGrade' },
       { to: PATHS.admin.assessments, label: 'Assessments & Marks', icon: Award },
+      { to: PATHS.admin.performance, label: 'Performance', icon: LineChart, badge: 'attention' },
     ],
   },
   {
-    title: 'Analytics',
+    title: 'Intelligence',
     items: [
-      { to: PATHS.admin.performance, label: 'Performance Monitoring', icon: TrendingUp },
       { to: PATHS.admin.predictions, label: 'ML Predictions', icon: BrainCircuit },
-      { to: PATHS.admin.reports, label: 'Reports & Analytics', icon: BarChart3, permission: 'VIEW_REPORTS' },
+      { to: PATHS.admin.models, label: 'ML Models', icon: Cpu },
+      { to: PATHS.admin.reports, label: 'Reports & Analytics', icon: BarChart3 },
     ],
   },
   {
-    title: 'System',
+    title: 'Communication & System',
     items: [
-      { to: PATHS.admin.notifications, label: 'Notifications', icon: Bell },
+      { to: PATHS.admin.notifications, label: 'Send Notifications', icon: Megaphone },
+      { to: PATHS.admin.inbox, label: 'My Inbox', icon: Inbox, badge: 'unread' },
       { to: PATHS.admin.settings, label: 'Settings', icon: Settings },
     ],
   },
 ];
 
-export const filterNav = (
-  sections: NavSection[],
-  role: UserRole | null,
-  hasPermission: (code: string) => boolean,
-): NavSection[] =>
-  sections
-    .map((section) => ({
-      ...section,
-      items: section.items.filter((item) => {
-        if (item.roles && (!role || !item.roles.includes(role))) return false;
-        if (item.permission && !(role && ADMINS.includes(role)) && !hasPermission(item.permission)) return false;
-        return true;
-      }),
-    }))
-    .filter((section) => section.items.length > 0);
+export const NAV_BY_PORTAL: Record<PortalKind, NavSection[]> = {
+  student: STUDENT_NAV,
+  faculty: FACULTY_NAV,
+  admin: ADMIN_NAV,
+};
+
+export const WORKSPACE_LABEL: Record<PortalKind, string> = {
+  student: 'Student Workspace',
+  faculty: 'Faculty Workspace',
+  admin: 'Administration',
+};

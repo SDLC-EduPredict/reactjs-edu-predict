@@ -6,30 +6,28 @@ import type {
   CategoryData,
   CategoryPayload,
   Course,
-  CourseDetailData,
+  CourseData,
   CourseListParams,
   CoursePayload,
 } from '../types';
 
 export const catalogApi = {
   categories: () => api.get<CategoriesData>(ENDPOINTS.catalog.categories),
-  courses: (params: CourseListParams) =>
-    api.get<Paginated<Course>>(ENDPOINTS.catalog.courses, params as QueryParams),
-  course: (idOrSlug: string | number) => api.get<CourseDetailData>(ENDPOINTS.catalog.course(idOrSlug)),
+  courses: (params: CourseListParams) => api.get<Paginated<Course>>(ENDPOINTS.catalog.courses, params as QueryParams),
+  course: (idOrSlug: string | number) => api.get<CourseData>(ENDPOINTS.catalog.course(idOrSlug)),
 };
 
 export const adminCatalogApi = {
   categories: () => api.get<CategoriesData>(ENDPOINTS.admin.categories),
-  createCategory: (payload: CategoryPayload) =>
-    api.post<CategoryData, CategoryPayload>(ENDPOINTS.admin.categories, payload),
+  category: (id: number) => api.get<CategoryData>(ENDPOINTS.admin.category(id)),
+  createCategory: (payload: CategoryPayload) => api.post<CategoryData, CategoryPayload>(ENDPOINTS.admin.categories, payload),
   updateCategory: ({ id, ...payload }: Partial<CategoryPayload> & { id: number }) =>
     api.patch<CategoryData>(ENDPOINTS.admin.category(id), payload),
   deleteCategory: (id: number) => api.delete(ENDPOINTS.admin.category(id)),
-  courses: (params: CourseListParams) =>
-    api.get<Paginated<Course>>(ENDPOINTS.admin.courses, params as QueryParams),
-  createCourse: (payload: CoursePayload) =>
-    api.post<CourseDetailData, CoursePayload>(ENDPOINTS.admin.courses, payload),
+  courses: (params: CourseListParams) => api.get<Paginated<Course>>(ENDPOINTS.admin.courses, params as QueryParams),
+  course: (id: number) => api.get<CourseData>(ENDPOINTS.admin.course(id)),
+  createCourse: (payload: CoursePayload) => api.post<CourseData, CoursePayload>(ENDPOINTS.admin.courses, payload),
   updateCourse: ({ id, ...payload }: Partial<CoursePayload> & { id: number }) =>
-    api.patch<CourseDetailData>(ENDPOINTS.admin.course(id), payload),
+    api.patch<CourseData>(ENDPOINTS.admin.course(id), payload),
   deleteCourse: (id: number) => api.delete(ENDPOINTS.admin.course(id)),
 };

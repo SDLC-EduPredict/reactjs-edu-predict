@@ -1,79 +1,80 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useState, type FormEvent } from 'react';
 import { Mail, MapPin, Phone, Send } from 'lucide-react';
+import { Button, Input, Select, Textarea } from '@/components/ui';
+import { useAppDispatch } from '@/app/store/hooks';
+import { toastAdded } from '@/app/store/slices/uiSlice';
 import { env } from '@/config/env';
-import { Alert, Button, Card, CardBody, Input, Textarea } from '@/components/ui';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
+import { useCategories } from '@/features/courses/hooks/useCourses';
 
-const contactSchema = z.object({
-  name: z.string().trim().min(2, 'Enter your name.'),
-  email: z.string().trim().email('Enter a valid email address.'),
-  phone: z.string().trim().regex(/^\d{10}$/, 'Phone number must be exactly 10 digits.'),
-  subject: z.string().trim().min(3, 'Enter a subject.'),
-  message: z.string().trim().min(10, 'Tell us a little more (at least 10 characters).'),
-});
+const ContactPage = () => {
+  useDocumentTitle('Contact Admissions');
+  const dispatch = useAppDispatch();
+  const categories = useCategories();
+  const [form, setForm] = useState({ name: '', email: '', interest: '', message: '' });
 
-type ContactValues = z.infer<typeof contactSchema>;
-
-export const ContactPage = () => {
-  useDocumentTitle('Contact & Admissions');
-  const { register, handleSubmit, formState, reset } = useForm<ContactValues>({ resolver: zodResolver(contactSchema) });
-
-  const onSubmit = (values: ContactValues) => {
-    const body = `${values.message}\n\n— ${values.name}\n${values.email}\n${values.phone}`;
-    window.location.assign(`mailto:${env.contactEmail}?subject=${encodeURIComponent(values.subject)}&body=${encodeURIComponent(body)}`);
-    reset();
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const body = `Name: ${form.name}\nEmail: ${form.email}\nInterest: ${form.interest || 'General'}\n\n${form.message}`;
+    window.open(`mailto:${env.contactEmail}?subject=${encodeURIComponent(`Admissions enquiry — ${form.name}`)}&body=${encodeURIComponent(body)}`, '_self');
+    dispatch(toastAdded({ type: 'success', title: 'Opening your email app', message: 'Send the drafted email to reach our admissions team.' }));
   };
 
+  const contacts = [
+    { icon: Mail, label: 'Email', value: env.contactEmail, href: `mailto:${env.contactEmail}` },
+    { icon: Phone, label: 'Phone', value: env.contactPhone, href: `tel:${env.contactPhone.replace(/\s/g, '')}` },
+    { icon: MapPin, label: 'Campus', value: env.contactAddress },
+  ];
+
   return (
-    <div className="pb-20">
-      <section className="border-b border-slate-200/60 bg-gradient-to-b from-brand-50/70 to-page py-12">
-        <div className="container-page">
-          <p className="text-xs font-bold uppercase tracking-wider text-brand-600">Admissions</p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">Contact us</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">Questions about courses, batches or fees? Our admissions team will get back to you.</p>
+    <section className="bg-gradient-to-b from-brand-50/70 to-white py-14 sm:py-20">
+      <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.2fr]">
+        <div>
+          <span className="eyebrow">Get in Touch</span>
+          <h1 className="mt-4 font-display text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+            Talk to Our <span className="highlight">Admissions</span> Team
+          </h1>
+          <p className="mt-4 text-slate-600">Questions about courses, batches, fees or the ML prediction tool? We usually reply within one working day.</p>
+          <div className="mt-8 space-y-3">
+            {contacts.map((item) => (
+              <div key={item.label} className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-card ring-1 ring-black/5">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-white">
+                  <item.icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-xs text-slate-500">{item.label}</p>
+                  {item.href ? (
+                    <a href={item.href} className="text-sm font-semibold text-slate-900 hover:text-brand-700">
+                      {item.value}
+                    </a>
+                  ) : (
+                    <p className="text-sm font-semibold text-slate-900">{item.value}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </section>
-      <div className="container-page mt-10 grid gap-8 lg:grid-cols-[1fr_360px]">
-        <Card>
-          <CardBody>
-            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 sm:grid-cols-2" noValidate>
-              <Input label="Full name" required {...register('name')} error={formState.errors.name?.message} />
-              <Input label="Email" type="email" required {...register('email')} error={formState.errors.email?.message} />
-              <Input label="Phone" inputMode="numeric" maxLength={10} required {...register('phone')} error={formState.errors.phone?.message} />
-              <Input label="Subject" required {...register('subject')} error={formState.errors.subject?.message} />
-              <div className="sm:col-span-2">
-                <Textarea label="Message" rows={5} required {...register('message')} error={formState.errors.message?.message} />
-              </div>
-              <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
-                <Alert tone="info">Your enquiry opens in your email app, addressed to {env.contactEmail}.</Alert>
-                <Button type="submit" icon={<Send className="h-4 w-4" />}>
-                  Send enquiry
-                </Button>
-              </div>
-            </form>
-          </CardBody>
-        </Card>
-        <div className="space-y-4">
-          {[
-            { icon: MapPin, title: 'Campus', value: env.contactAddress },
-            { icon: Mail, title: 'Email', value: env.contactEmail },
-            { icon: Phone, title: 'Phone', value: env.contactPhone },
-          ].map((item) => (
-            <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card">
-              <span className="rounded-xl bg-brand-50 p-2.5 text-brand-600">
-                <item.icon className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{item.title}</p>
-                <p className="mt-0.5 text-sm font-semibold text-slate-800">{item.value}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <form onSubmit={submit} className="space-y-4 rounded-3xl bg-white p-6 shadow-card ring-1 ring-black/5 sm:p-8">
+          <h2 className="font-display text-xl font-semibold text-slate-900">Send an enquiry</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="Full name" required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
+            <Input label="Email" type="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+          </div>
+          <Select
+            label="Area of interest"
+            placeholder="General enquiry"
+            value={form.interest}
+            onChange={(event) => setForm({ ...form, interest: event.target.value })}
+            options={(categories.data ?? []).map((item) => ({ value: item.name, label: item.name }))}
+          />
+          <Textarea label="Message" rows={5} required value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} />
+          <Button type="submit" size="lg" fullWidth icon={<Send className="h-4 w-4" />}>
+            Send Enquiry
+          </Button>
+        </form>
       </div>
-    </div>
+    </section>
   );
 };
 

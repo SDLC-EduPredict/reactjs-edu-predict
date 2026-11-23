@@ -1,27 +1,41 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Mulish', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Roboto Slab', ui-serif, Georgia, serif;
 
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-300: #a5b4fc;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --color-brand-800: #3730a3;
-  --color-brand-900: #312e81;
-  --color-brand-950: #1e1b4b;
+  --color-brand-50: #f0eefc;
+  --color-brand-100: #e6e3fb;
+  --color-brand-200: #cfcaf5;
+  --color-brand-300: #a9a3e8;
+  --color-brand-400: #6f6bc9;
+  --color-brand-500: #3d3fa6;
+  --color-brand-600: #232891;
+  --color-brand-700: #1a1f71;
+  --color-brand-800: #141859;
+  --color-brand-900: #0f1244;
+  --color-brand-950: #0a0d2e;
 
-  --color-page: #f8fafc;
+  --color-sun-50: #fffaeb;
+  --color-sun-100: #fdf0c8;
+  --color-sun-200: #fbe39a;
+  --color-sun-300: #f9d56e;
+  --color-sun-400: #f6c445;
+  --color-sun-500: #eeb21f;
 
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
-  --shadow-lift: 0 18px 40px -18px rgb(79 70 229 / 0.35);
+  --color-lime-soft: #e3f5cb;
+  --color-lime-brand: #9fd356;
+  --color-lime-ink: #3f6b0f;
+
+  --color-page: #ffffff;
+  --color-canvas: #f6f7fb;
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 14px -6px rgb(15 23 42 / 0.08);
+  --shadow-lift: 0 22px 44px -22px rgb(26 31 113 / 0.45);
 
   --animate-toast-in: toast-in 220ms ease-out;
   --animate-fade-in: fade-in 180ms ease-out;
+  --animate-rise: rise 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 
   @keyframes toast-in {
     from { opacity: 0; transform: translateY(8px) scale(0.98); }
@@ -31,18 +45,26 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
   body {
     @apply bg-page text-slate-800 font-sans;
   }
+  h1, h2, h3, h4 {
+    @apply text-slate-900;
+  }
   ::selection {
-    @apply bg-brand-600 text-white;
+    @apply bg-brand-700 text-white;
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;
@@ -53,17 +75,40 @@
   .container-page {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
-  .text-gradient {
-    @apply bg-gradient-to-r from-brand-600 via-violet-600 to-brand-700 bg-clip-text text-transparent;
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .highlight {
+    @apply relative inline-block px-1.5;
+    background: linear-gradient(180deg, transparent 8%, var(--color-sun-300) 8%, var(--color-sun-300) 94%, transparent 94%);
+    border-radius: 0.6rem;
+  }
+  .highlight-white {
+    @apply relative inline-block px-1.5;
+    background: linear-gradient(180deg, transparent 8%, #ffffff 8%, #ffffff 94%, transparent 94%);
+    border-radius: 0.6rem;
+  }
+  .accent {
+    @apply text-brand-700;
+  }
+  .section-sun {
+    background: linear-gradient(180deg, #fbdc7f 0%, var(--color-sun-300) 100%);
+  }
+  .navy-panel :is(h1, h2, h3, h4) {
+    color: #fff;
+  }
+  .navy-panel {
+    background:
+      radial-gradient(28rem 14rem at 100% 0%, rgb(159 211 86 / 0.14), transparent 70%),
+      linear-gradient(145deg, #1f2484 0%, #151a63 55%, #0f1349 100%);
   }
   .footer-gradient {
     background:
-      radial-gradient(60rem 22rem at 85% 110%, rgb(196 181 253 / 0.45), transparent 70%),
-      radial-gradient(40rem 18rem at 10% 100%, rgb(165 180 252 / 0.35), transparent 70%),
-      linear-gradient(180deg, var(--color-page) 0%, #eef2ff 22%, #e0e7ff 58%, #ede9fe 100%);
+      radial-gradient(50rem 18rem at 80% 0%, rgb(61 63 166 / 0.35), transparent 70%),
+      linear-gradient(180deg, #0d1140 0%, #151a63 45%, #262c8a 80%, #3a40a8 100%);
   }
-  .portal-footer-gradient {
-    background: linear-gradient(90deg, #f8fafc 0%, #eef2ff 45%, #f5f3ff 100%);
+  .eyebrow {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700;
   }
 }
 

@@ -4,17 +4,21 @@ import type { Paginated, QueryParams } from '@/types';
 import type {
   AttendanceListParams,
   AttendanceRecord,
+  AttendanceStatus,
+  AttendanceSummaryData,
   MarkAttendancePayload,
-  UpdateAttendancePayload,
+  StudentAttendanceCourse,
 } from '../types';
 
 export const attendanceApi = {
-  mine: (params: QueryParams) => api.get<unknown>(ENDPOINTS.student.attendance, params),
+  mine: () => api.get<{ courses: StudentAttendanceCourse[] }>(ENDPOINTS.student.attendance),
   list: (params: AttendanceListParams) =>
-    api.get<Paginated<AttendanceRecord>>(ENDPOINTS.academics.attendance, params as QueryParams),
+    api.get<Paginated<AttendanceRecord>>(ENDPOINTS.attendance.list, params as QueryParams),
   mark: (payload: MarkAttendancePayload) =>
-    api.post<{ attendance: AttendanceRecord }, MarkAttendancePayload>(ENDPOINTS.academics.attendance, payload),
-  update: ({ id, ...payload }: UpdateAttendancePayload & { id: number }) =>
-    api.patch<{ attendance: AttendanceRecord }, UpdateAttendancePayload>(ENDPOINTS.academics.attendanceRecord(id), payload),
-  remove: (id: number) => api.delete(ENDPOINTS.academics.attendanceRecord(id)),
+    api.post<{ date: string; records: AttendanceRecord[] }, MarkAttendancePayload>(ENDPOINTS.attendance.list, payload),
+  summary: (courseId: number) => api.get<AttendanceSummaryData>(ENDPOINTS.attendance.summary, { course: courseId }),
+  detail: (id: number) => api.get<{ attendance: AttendanceRecord }>(ENDPOINTS.attendance.detail(id)),
+  update: ({ id, ...payload }: { id: number; status?: AttendanceStatus; remarks?: string }) =>
+    api.patch<{ attendance: AttendanceRecord }>(ENDPOINTS.attendance.detail(id), payload),
+  remove: (id: number) => api.delete(ENDPOINTS.attendance.detail(id)),
 };

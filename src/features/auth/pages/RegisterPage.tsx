@@ -35,7 +35,8 @@ export const RegisterPage = () => {
 
   return (
     <AuthShell
-      title="Create your account"
+      title="Registration"
+      illustration="right"
       subtitle="Register to enrol in courses and track your academic performance."
       footer={
         <>

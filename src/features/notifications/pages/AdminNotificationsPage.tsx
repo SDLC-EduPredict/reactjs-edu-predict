@@ -1,144 +1,143 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Inbox, Megaphone, Send, Trash2 } from 'lucide-react';
-import { Badge, Button, ButtonLink, Card, CardBody, CardHeader, ConfirmDialog, DataTable, Input, PageHeader, Pagination, Select, Textarea, type Column } from '@/components/ui';
-import { PATHS } from '@/app/router/paths';
-import { env } from '@/config/env';
-import { getErrorMessage } from '@/lib/api/apiError';
+import { useState, type FormEvent } from 'react';
+import { Megaphone, Send, Trash2 } from 'lucide-react';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, DataTable, Input, PageHeader, Pagination, SearchInput, Select, Tabs, Textarea } from '@/components/ui';
+import { StaffCourseSelect } from '@/components/domain/StaffCourseSelect';
+import { useAppDispatch } from '@/app/store/hooks';
+import { toastAdded } from '@/app/store/slices/uiSlice';
+import { useDebouncedValue } from '@/lib/hooks/useDebouncedValue';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
-import { formatDate, humanize } from '@/lib/utils/format';
-import { useCurrentUser } from '@/features/auth/hooks/useAuth';
-import { useCourseOptions } from '@/features/courses/hooks/useCourses';
-import { useAdminNotifications, useBroadcastNotification, useDeleteBroadcast } from '../hooks/useNotifications';
-import { NOTIFICATION_AUDIENCES, NOTIFICATION_TYPES, type BroadcastNotification } from '../types';
-import { NotificationsPage } from './NotificationsPage';
+import { useListFilter } from '@/lib/hooks/useListFilter';
+import { cn } from '@/lib/utils/cn';
+import { formatRelative, humanize } from '@/lib/utils/format';
+import { useAdminFaculty } from '@/features/faculty/hooks/useFaculty';
+import { useAdminStudents } from '@/features/students/hooks/useStudents';
+import { useAdminNotifications, useDeleteAdminNotification, useSendNotification } from '../hooks/useNotifications';
+import { NOTIFICATION_AUDIENCES, NOTIFICATION_TYPES, type AdminNotification, type NotificationAudience, type NotificationType } from '../types';
 
-const schema = z
-  .object({
-    title: z.string().trim().min(3, 'Enter a title.').max(200),
-    message: z.string().trim().min(5, 'Enter a message.'),
-    notification_type: z.enum(['COURSE', 'ASSIGNMENT', 'ASSESSMENT', 'ACADEMIC_ALERT', 'ADMINISTRATIVE']),
-    audience: z.enum(['ALL', 'STUDENTS', 'FACULTY', 'COURSE', 'USER']),
-    course: z.string(),
-    user: z.string().trim(),
-  })
-  .refine((values) => values.audience !== 'COURSE' || values.course, { path: ['course'], message: 'Choose a course.' })
-  .refine((values) => values.audience !== 'USER' || values.user, { path: ['user'], message: 'Enter the user ID.' });
-type Values = z.infer<typeof schema>;
-
-export const AdminNotificationsPage = () => {
-  useDocumentTitle('Notifications');
-  const { isAdmin, hasPermission } = useCurrentUser();
-  const canSend = isAdmin || hasPermission('SEND_NOTIFICATIONS');
-  const [page, setPage] = useState(1);
-  const sent = useAdminNotifications({ page, page_size: env.defaultPageSize }, canSend);
-  const broadcast = useBroadcastNotification();
-  const remove = useDeleteBroadcast();
-  const courseOptions = useCourseOptions();
-  const [deleting, setDeleting] = useState<BroadcastNotification | null>(null);
-  const { register, handleSubmit, control, reset, formState } = useForm<Values>({
-    resolver: zodResolver(schema),
-    defaultValues: { notification_type: 'ADMINISTRATIVE', audience: 'ALL', course: '', user: '', title: '', message: '' },
-  });
-  const audience = useWatch({ control, name: 'audience' });
-
-  if (!canSend) return <NotificationsPage />;
-
-  const onSubmit = (values: Values) =>
-    broadcast.mutate(
-      {
-        title: values.title,
-        message: values.message,
-        notification_type: values.notification_type,
-        audience: values.audience,
-        course: values.audience === 'COURSE' ? Number(values.course) : undefined,
-        user: values.audience === 'USER' ? values.user : undefined,
-      },
-      { onSuccess: () => reset() },
-    );
-
-  const columns: Column<BroadcastNotification>[] = [
-    {
-      key: 'title',
-      header: 'Notification',
-      render: (row) => (
-        <div>
-          <p className="font-semibold text-slate-900">{row.title}</p>
-          <p className="line-clamp-1 max-w-sm text-[11px] text-slate-500">{row.message}</p>
-        </div>
-      ),
-    },
-    { key: 'type', header: 'Type', render: (row) => <Badge tone="violet">{row.notification_type_display ?? humanize(row.notification_type)}</Badge> },
-    { key: 'audience', header: 'Audience', render: (row) => `${row.audience_display ?? humanize(row.audience)}${row.course ? ` · ${row.course.title}` : ''}` },
-    { key: 'recipients', header: 'Recipients', render: (row) => row.recipient_count ?? '—' },
-    { key: 'date', header: 'Sent', render: (row) => formatDate(row.created_at, true) },
-    {
-      key: 'actions',
-      header: '',
-      render: (row) => <Button size="sm" variant="ghost" className="text-rose-600 hover:bg-rose-50" icon={<Trash2 className="h-3.5 w-3.5" />} onClick={() => setDeleting(row)} aria-label="Delete" />,
-    },
+const RecipientPicker = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
+  const [search, setSearch] = useState('');
+  const debounced = useDebouncedValue(search);
+  const students = useAdminStudents({ page: 1, page_size: 20, search: debounced }, debounced.length > 1);
+  const faculty = useAdminFaculty({ page: 1, page_size: 20, search: debounced }, debounced.length > 1);
+  const options = [
+    ...(students.data?.results ?? []).map((s) => ({ value: s.user.id, label: `${s.user.full_name} · Student` })),
+    ...(faculty.data?.results ?? []).map((f) => ({ value: f.user.id, label: `${f.user.full_name} · Faculty` })),
   ];
+  return (
+    <div className="space-y-2">
+      <Input label="Find recipient" placeholder="Type at least 2 letters…" value={search} onChange={(e) => setSearch(e.target.value)} />
+      <Select aria-label="Recipient" placeholder={debounced.length > 1 ? `${options.length} matches` : 'Search to list users'} value={value} onChange={(e) => onChange(e.target.value)} options={options} />
+    </div>
+  );
+};
 
-  const e = formState.errors;
+const Composer = () => {
+  const dispatch = useAppDispatch();
+  const send = useSendNotification();
+  const [audience, setAudience] = useState<NotificationAudience>('ALL');
+  const [type, setType] = useState<NotificationType>('ADMINISTRATIVE');
+  const [title, setTitle] = useState('');
+  const [message, setMessage] = useState('');
+  const [course, setCourse] = useState('');
+  const [user, setUser] = useState('');
+
+  const invalid = !title || !message || (audience === 'COURSE' && !course) || (audience === 'USER' && !user);
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    send.mutate(
+      { audience, notification_type: type, title, message, course: audience === 'COURSE' ? Number(course) : undefined, user: audience === 'USER' ? user : undefined },
+      {
+        onSuccess: (result) => {
+          dispatch(toastAdded({ type: 'success', title: 'Notification sent', message: result.message || `Delivered to ${result.data.recipients} recipient(s).` }));
+          setTitle('');
+          setMessage('');
+        },
+      },
+    );
+  };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Communication"
-        title="Notifications"
-        description="Send course, academic and administrative announcements to students and faculty."
-        actions={
-          <ButtonLink to={`${PATHS.admin.notifications}/inbox`} variant="outline" icon={<Inbox className="h-4 w-4" />}>
-            My inbox
-          </ButtonLink>
-        }
+    <Card>
+      <CardHeader icon={<Megaphone className="h-4 w-4" />} title="Compose announcement" description="Delivered instantly to each recipient's inbox." />
+      <CardBody>
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <p className="mb-2 text-xs font-semibold text-slate-600">Audience</p>
+            <div className="flex flex-wrap gap-2">
+              {NOTIFICATION_AUDIENCES.map((item) => (
+                <button key={item.value} type="button" onClick={() => setAudience(item.value)} className={cn('rounded-full px-3.5 py-1.5 text-xs font-semibold transition', audience === item.value ? 'bg-brand-700 text-white' : 'bg-brand-50 text-brand-700 hover:bg-brand-100')}>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {audience === 'COURSE' && <StaffCourseSelect label="Course" value={course} onChange={setCourse} placeholder="Select course" />}
+          {audience === 'USER' && <RecipientPicker value={user} onChange={setUser} />}
+          <Select label="Type" value={type} onChange={(e) => setType(e.target.value as NotificationType)} options={NOTIFICATION_TYPES.map((t) => ({ value: t.value, label: t.label }))} />
+          <Input label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Textarea label="Message" rows={5} required value={message} onChange={(e) => setMessage(e.target.value)} />
+          <Button type="submit" fullWidth icon={<Send className="h-4 w-4" />} loading={send.isPending} disabled={invalid}>
+            Send notification
+          </Button>
+        </form>
+      </CardBody>
+    </Card>
+  );
+};
+
+const History = () => {
+  const list = useListFilter('admin-notifications');
+  const f = list.filters;
+  const notifications = useAdminNotifications({ ...list.params, notification_type: f.notification_type || undefined, is_read: f.is_read || undefined });
+  const remove = useDeleteAdminNotification();
+  const [target, setTarget] = useState<AdminNotification | null>(null);
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader title="Delivery log" description="Every notification delivered across the institute" />
+      <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center">
+        <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search title or recipient…" className="flex-1" />
+        <Select aria-label="Type" containerClassName="md:w-44" placeholder="All types" value={f.notification_type ?? ''} onChange={(e) => list.setFilter('notification_type', e.target.value)} options={NOTIFICATION_TYPES.map((t) => ({ value: t.value, label: t.label }))} />
+        <Tabs tabs={[{ value: '', label: 'All' }, { value: 'false', label: 'Unread' }, { value: 'true', label: 'Read' }]} value={f.is_read ?? ''} onChange={(value) => list.setFilter('is_read', value)} />
+      </div>
+      <DataTable
+        rows={notifications.data?.results}
+        loading={notifications.isPending}
+        rowKey={(row) => row.id}
+        emptyTitle="Nothing sent yet"
+        columns={[
+          { key: 't', header: 'Notification', render: (row) => <div className="max-w-xs"><p className="truncate font-semibold text-slate-900">{row.title}</p><p className="truncate text-[11px] text-slate-500">{row.message}</p></div> },
+          { key: 'r', header: 'Recipient', render: (row) => <div><p className="text-sm">{row.recipient.full_name}</p><p className="text-[11px] text-slate-500">{humanize(row.recipient.role)}</p></div> },
+          { key: 'ty', header: 'Type', render: (row) => <Badge tone={row.notification_type === 'ACADEMIC_ALERT' ? 'rose' : 'brand'}>{row.notification_type_display}</Badge> },
+          { key: 'st', header: 'Read', render: (row) => <Badge tone={row.is_read ? 'lime' : 'slate'}>{row.is_read ? 'Read' : 'Unread'}</Badge> },
+          { key: 'd', header: 'Sent', render: (row) => <span className="text-xs">{formatRelative(row.created_at)}</span> },
+          { key: 'x', header: '', render: (row) => <Button size="sm" variant="ghost" aria-label="Delete" icon={<Trash2 className="h-3.5 w-3.5 text-rose-500" />} onClick={() => setTarget(row)} /> },
+        ]}
       />
-      <Card>
-        <CardHeader icon={<Megaphone className="h-4 w-4" />} title="Compose notification" />
-        <CardBody>
-          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 md:grid-cols-2" noValidate>
-            <Input label="Title" required containerClassName="md:col-span-2" {...register('title')} error={e.title?.message} />
-            <div className="md:col-span-2">
-              <Textarea label="Message" rows={4} required {...register('message')} error={e.message?.message} />
-            </div>
-            <Select label="Type" options={NOTIFICATION_TYPES.map((item) => ({ value: item.value, label: item.label }))} {...register('notification_type')} />
-            <Select label="Audience" options={NOTIFICATION_AUDIENCES.map((item) => ({ value: item.value, label: item.label }))} {...register('audience')} />
-            {audience === 'COURSE' && <Select label="Course" placeholder="Select a course" options={courseOptions.options} {...register('course')} error={e.course?.message} />}
-            {audience === 'USER' && <Input label="User ID" hint="The user's UUID from Student / Faculty management" {...register('user')} error={e.user?.message} />}
-            <div className="flex justify-end md:col-span-2">
-              <Button type="submit" icon={<Send className="h-4 w-4" />} loading={broadcast.isPending}>
-                Send notification
-              </Button>
-            </div>
-          </form>
-        </CardBody>
-      </Card>
-      <Card>
-        <CardHeader title="Sent notifications" action={<Link to={`${PATHS.admin.notifications}/inbox`} className="text-xs font-semibold text-brand-700 hover:underline">View my inbox</Link>} />
-        <DataTable
-          columns={columns}
-          rows={sent.data?.results}
-          rowKey={(row) => row.id}
-          loading={sent.isPending}
-          error={sent.isError ? getErrorMessage(sent.error) : null}
-          onRetry={() => sent.refetch()}
-          emptyTitle="Nothing sent yet"
-        />
-        {sent.data && <Pagination page={page} pageSize={env.defaultPageSize} count={sent.data.count} onPageChange={setPage} />}
-      </Card>
+      <Pagination page={list.page} pageSize={list.pageSize} count={notifications.data?.count ?? 0} onPageChange={list.setPage} />
       <ConfirmDialog
-        open={deleting !== null}
+        open={target !== null}
         title="Delete notification?"
-        message={`“${deleting?.title}” will be removed for all recipients.`}
+        message={`Removes “${target?.title ?? ''}” from ${target?.recipient.full_name ?? 'the recipient'}'s inbox.`}
         confirmLabel="Delete"
         loading={remove.isPending}
-        onClose={() => setDeleting(null)}
-        onConfirm={() => deleting && remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
+        onClose={() => setTarget(null)}
+        onConfirm={() => target && remove.mutate(target.id, { onSuccess: () => setTarget(null) })}
       />
-    </div>
+    </Card>
+  );
+};
+
+const AdminNotificationsPage = () => {
+  useDocumentTitle('Send Notifications');
+  return (
+    <>
+      <PageHeader eyebrow="Communication" title="Send Notifications" description="Broadcast announcements to everyone, a role, a course batch or a single user." />
+      <div className="grid gap-6 xl:grid-cols-[400px_1fr]">
+        <Composer />
+        <History />
+      </div>
+    </>
   );
 };
 

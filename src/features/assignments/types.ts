@@ -1,19 +1,23 @@
-import type { CourseRef, ListParams, StudentRef } from '@/types';
+import type { AssignmentProgress, CourseRef, ListParams, StudentRef } from '@/types';
 
-export type SubmissionStatus = 'PENDING' | 'SUBMITTED' | 'LATE' | 'GRADED';
+export type SubmissionStatus = 'PENDING' | 'SUBMITTED' | 'GRADED';
 
 export interface Submission {
   id: number;
-  assignment?: { id: number; title: string; max_marks: number };
-  student?: StudentRef;
-  submission_text?: string | null;
-  file?: string | null;
-  submitted_at?: string | null;
+  assignment: number;
+  enrolment: number;
   status: SubmissionStatus | (string & {});
-  status_display?: string;
-  marks_obtained?: number | null;
-  feedback?: string | null;
-  graded_at?: string | null;
+  status_display: string;
+  submission_text: string;
+  submission_link: string;
+  submission_file: string | null;
+  submitted_at: string | null;
+  is_late: boolean;
+  marks: number | null;
+  percentage: number | null;
+  feedback: string;
+  graded_by: string | null;
+  graded_at: string | null;
 }
 
 export interface Assignment {
@@ -23,18 +27,35 @@ export interface Assignment {
   description: string;
   due_date: string;
   max_marks: number;
-  attachment?: string | null;
-  is_published?: boolean;
-  submission_count?: number;
-  graded_count?: number;
-  average_marks?: number | null;
-  my_submission?: Submission | null;
-  created_at?: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentAssignmentItem {
+  id: number;
+  title: string;
+  description: string;
+  due_date: string;
+  max_marks: number;
+  my_status: SubmissionStatus | (string & {});
+  my_submission: Submission | null;
+}
+
+export interface StudentAssignmentsCourse {
+  enrolment_id: number;
+  course: CourseRef;
+  summary: AssignmentProgress;
+  assignments: StudentAssignmentItem[];
+}
+
+export interface SubmissionsData {
+  assignment: Assignment;
+  students: { enrolment_id: number; student: StudentRef; status: string; submission: Submission | null }[];
 }
 
 export interface AssignmentListParams extends ListParams {
   course?: string;
-  status?: string;
 }
 
 export interface AssignmentPayload {
@@ -43,15 +64,14 @@ export interface AssignmentPayload {
   description: string;
   due_date: string;
   max_marks: number;
-  is_published: boolean;
 }
 
-export interface SubmitAssignmentPayload {
-  submission_text?: string;
-  file?: File | null;
+export interface SubmitPayload {
+  submission_text: string;
+  submission_link: string;
+  submission_file: File | null;
 }
 
-export interface GradeSubmissionPayload {
-  marks_obtained: number;
-  feedback?: string;
+export interface GradePayload {
+  records: { enrolment: number; marks: number; feedback?: string }[];
 }

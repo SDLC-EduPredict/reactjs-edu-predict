@@ -1,15 +1,15 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { asList } from '@/lib/api/normalize';
 import { queryKeys } from '@/lib/query/queryKeys';
 import type { QueryParams } from '@/types';
 import { assignmentsApi } from '../api/assignmentsApi';
-import type { Assignment, AssignmentListParams, Submission } from '../types';
+import type { AssignmentListParams } from '../types';
 
-export const useMyAssignments = (params: QueryParams = {}) =>
+export const useMyAssignments = (enabled = true) =>
   useQuery({
-    queryKey: queryKeys.studentPortal.assignments(params),
-    queryFn: () => assignmentsApi.mine(params),
-    select: (result) => asList<Assignment>(result.data, ['assignments']),
+    queryKey: queryKeys.studentPortal.assignments,
+    enabled,
+    queryFn: assignmentsApi.mine,
+    select: (result) => result.data.courses,
   });
 
 export const useSubmitAssignment = () => {
@@ -21,21 +21,43 @@ export const useSubmitAssignment = () => {
   });
 };
 
-export const useAssignments = (params: AssignmentListParams) =>
+export const useAssignments = (params: AssignmentListParams, enabled = true) =>
   useQuery({
-    queryKey: queryKeys.academics.assignments(params as QueryParams),
+    queryKey: queryKeys.assignments.list(params as QueryParams),
     queryFn: () => assignmentsApi.list(params),
+    enabled,
     placeholderData: keepPreviousData,
     select: (result) => result.data,
   });
 
-const useInvalidateAssignments = () => {
+export const useAssignment = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.assignments.detail(id ?? 0),
+    queryFn: () => assignmentsApi.detail(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.assignment,
+  });
+
+export const useSubmissions = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.assignments.submissions(id ?? 0),
+    queryFn: () => assignmentsApi.submissions(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data,
+  });
+
+const useInvalidate = () => {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: queryKeys.academics.assignmentsAll });
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.assignments.all }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.performance.all }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.facultyPortal.dashboard }),
+    ]);
 };
 
 export const useCreateAssignment = () => {
-  const invalidate = useInvalidateAssignments();
+  const invalidate = useInvalidate();
   return useMutation({
     mutationFn: assignmentsApi.create,
     meta: { successMessage: 'Assignment created', errorTitle: 'Could not create assignment' },
@@ -44,7 +66,7 @@ export const useCreateAssignment = () => {
 };
 
 export const useUpdateAssignment = () => {
-  const invalidate = useInvalidateAssignments();
+  const invalidate = useInvalidate();
   return useMutation({
     mutationFn: assignmentsApi.update,
     meta: { successMessage: 'Assignment updated', errorTitle: 'Could not update assignment' },
@@ -53,7 +75,7 @@ export const useUpdateAssignment = () => {
 };
 
 export const useDeleteAssignment = () => {
-  const invalidate = useInvalidateAssignments();
+  const invalidate = useInvalidate();
   return useMutation({
     mutationFn: assignmentsApi.remove,
     meta: { successMessage: 'Assignment deleted', errorTitle: 'Could not delete assignment' },
@@ -61,23 +83,11 @@ export const useDeleteAssignment = () => {
   });
 };
 
-export const useSubmissions = (assignmentId: number | null) =>
-  useQuery({
-    queryKey: queryKeys.academics.submissions(assignmentId ?? 0),
-    queryFn: () => assignmentsApi.submissions(assignmentId ?? 0),
-    enabled: assignmentId !== null,
-    select: (result) => asList<Submission>(result.data, ['submissions']),
-  });
-
-export const useGradeSubmission = (assignmentId: number | null) => {
-  const queryClient = useQueryClient();
+export const useGradeSubmissions = () => {
+  const invalidate = useInvalidate();
   return useMutation({
     mutationFn: assignmentsApi.grade,
-    meta: { successMessage: 'Marks saved', errorTitle: 'Could not save marks' },
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.academics.submissions(assignmentId ?? 0) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.academics.assignmentsAll }),
-      ]),
+    meta: { successMessage: 'Grade saved', errorTitle: 'Could not save grade' },
+    onSuccess: invalidate,
   });
 };

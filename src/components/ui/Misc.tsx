@@ -15,9 +15,9 @@ const avatarSizes = { sm: 'h-8 w-8 text-xs', md: 'h-10 w-10 text-sm', lg: 'h-14 
 export const Avatar = ({ name, src, size = 'md', className }: AvatarProps) => {
   const url = resolveMediaUrl(src);
   return url ? (
-    <img src={url} alt={name ?? 'Avatar'} className={cn('shrink-0 rounded-xl object-cover ring-1 ring-slate-200', avatarSizes[size], className)} />
+    <img src={url} alt={name ?? 'Avatar'} className={cn('shrink-0 rounded-full object-cover ring-1 ring-slate-200', avatarSizes[size], className)} />
   ) : (
-    <span className={cn('inline-flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 font-bold text-white', avatarSizes[size], className)}>
+    <span className={cn('inline-flex shrink-0 items-center justify-center rounded-full bg-brand-700 font-bold text-white', avatarSizes[size], className)}>
       {initials(name)}
     </span>
   );
@@ -34,7 +34,7 @@ export const PageHeader = ({ title, description, actions, eyebrow }: PageHeaderP
   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
       {eyebrow && <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-brand-600">{eyebrow}</p>}
-      <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">{title}</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.7rem]">{title}</h1>
       {description && <p className="mt-1 max-w-2xl text-sm text-slate-500">{description}</p>}
     </div>
     {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
@@ -83,7 +83,7 @@ export const StatCard = ({ label, value, icon, hint, tone = 'brand' }: StatCardP
     <div className="flex items-start justify-between gap-3">
       <div>
         <p className="text-xs font-semibold text-slate-500">{label}</p>
-        <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">{value}</p>
+        <p className="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900">{value}</p>
       </div>
       {icon && <div className={cn('rounded-xl p-2.5', statTones[tone])}>{icon}</div>}
     </div>
@@ -92,7 +92,7 @@ export const StatCard = ({ label, value, icon, hint, tone = 'brand' }: StatCardP
 );
 
 export const ProgressBar = ({ value, tone = 'brand', className }: { value: number; tone?: 'brand' | 'green' | 'amber' | 'rose'; className?: string }) => {
-  const color = { brand: 'from-brand-500 to-violet-500', green: 'from-emerald-500 to-teal-500', amber: 'from-amber-400 to-orange-500', rose: 'from-rose-500 to-pink-500' }[tone];
+  const color = { brand: 'from-brand-600 to-brand-400', green: 'from-lime-brand to-emerald-500', amber: 'from-amber-400 to-orange-500', rose: 'from-rose-500 to-pink-500' }[tone];
   const width = Math.max(0, Math.min(100, value));
   return (
     <div className={cn('h-2 w-full overflow-hidden rounded-full bg-slate-100', className)}>
@@ -115,12 +115,12 @@ export const Tabs = <T extends string>({ tabs, value, onChange }: TabsProps<T>) 
         type="button"
         onClick={() => onChange(tab.value)}
         className={cn(
-          'rounded-lg px-3 py-1.5 text-xs font-semibold transition',
-          value === tab.value ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500 hover:text-slate-800',
+          'rounded-full px-3.5 py-1.5 text-xs font-semibold transition',
+          value === tab.value ? 'bg-brand-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800',
         )}
       >
         {tab.label}
-        {tab.count !== undefined && <span className="ml-1.5 rounded-md bg-slate-200/80 px-1.5 text-[10px]">{tab.count}</span>}
+        {tab.count !== undefined && <span className="ml-1.5 rounded-full bg-black/10 px-1.5 text-[10px]">{tab.count}</span>}
       </button>
     ))}
   </div>

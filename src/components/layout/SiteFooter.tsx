@@ -5,106 +5,98 @@ import { PATHS } from '@/app/router/paths';
 import { BrandLogo } from './BrandLogo';
 
 const PROGRAMS = [
-  'Python Programming',
-  'Django Development',
-  'Full Stack Development',
-  'Data Science',
-  'Machine Learning',
-  'Artificial Intelligence',
+  'Python for Data Science',
+  'Machine Learning Fundamentals',
+  'Advanced Django Architecture',
+  'Full Stack Web Development',
+  'Linear Regression Deep Dive',
+  'Neural Networks Workshop',
 ];
 
 const TRACKS = [
-  'Python course in Kolkata',
-  'Django course',
-  'Machine learning course',
-  'Full stack development course',
+  'AI Course in Kolkata',
+  'ML Engineering Certification',
+  'Best Python Institute India',
+  'Supervised Learning Modules',
+  'Career in Predictive Analytics',
 ];
 
-const QUICK_LINKS = [
-  { to: PATHS.about, label: 'About the institute' },
-  { to: PATHS.courses, label: 'Browse courses' },
-  { to: PATHS.faculty, label: 'Meet our faculty' },
-  { to: PATHS.register, label: 'Student registration' },
-  { to: PATHS.contact, label: 'Contact & admissions' },
+const PORTALS = [
+  { to: PATHS.student.dashboard, label: 'Student Dashboard' },
+  { to: PATHS.faculty_portal.dashboard, label: 'Faculty LMS Portal' },
+  { to: PATHS.courses, label: 'Examination Centre' },
+  { to: PATHS.student.prediction, label: 'ML Prediction Tool' },
+  { to: PATHS.contact, label: 'Placement Cell' },
 ];
 
 export const SiteFooter = () => (
-  <footer className="footer-gradient relative mt-auto text-slate-600">
-    <div className="container-page pb-10 pt-20">
-      <div className="grid grid-cols-1 gap-10 border-b border-brand-200/60 pb-12 md:grid-cols-2 lg:grid-cols-5">
-        <div className="space-y-4 lg:col-span-2">
-          <BrandLogo />
-          <p className="max-w-sm text-sm leading-relaxed text-slate-600">
-            {env.instituteName} offers industry-focused courses in Python, Django, Full Stack Development, Data Science and Machine Learning,
-            with Linear Regression based academic performance prediction for every learner.
-          </p>
-          <ul className="space-y-2 text-xs text-slate-600">
-            <li className="flex items-center gap-2.5">
-              <MapPin className="h-4 w-4 shrink-0 text-brand-600" />
-              {env.contactAddress}
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Mail className="h-4 w-4 shrink-0 text-brand-600" />
-              <a href={`mailto:${env.contactEmail}`} className="hover:text-brand-700">
-                {env.contactEmail}
-              </a>
-            </li>
-            <li className="flex items-center gap-2.5">
-              <Phone className="h-4 w-4 shrink-0 text-brand-600" />
-              <a href={`tel:${env.contactPhone.replace(/\s/g, '')}`} className="hover:text-brand-700">
-                {env.contactPhone}
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-brand-950">Programs</h2>
-          <ul className="space-y-2.5 text-sm">
-            {PROGRAMS.map((program) => (
-              <li key={program}>
-                <Link to={`${PATHS.courses}?search=${encodeURIComponent(program)}`} className="transition-colors hover:text-brand-700">
-                  {program}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-brand-950">Popular searches</h2>
-          <ul className="space-y-2.5 text-sm">
-            {TRACKS.map((track) => (
-              <li key={track} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-brand-500 to-violet-500" />
-                <Link to={`${PATHS.courses}?search=${encodeURIComponent(track.replace(/ course.*$/i, ''))}`} className="hover:text-brand-700">
-                  {track}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-brand-950">Quick links</h2>
-          <ul className="space-y-2.5 text-sm">
-            {QUICK_LINKS.map((link) => (
-              <li key={link.to}>
-                <Link to={link.to} className="transition-colors hover:text-brand-700">
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center justify-between gap-3 pt-6 text-xs text-slate-500 md:flex-row">
-        <p>
-          © {new Date().getFullYear()} {env.appName} · {env.appTagline}
+  <footer className="footer-gradient relative text-white/70">
+    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+    <div className="container-page grid gap-10 pb-10 pt-16 md:grid-cols-2 lg:grid-cols-4">
+      <div className="space-y-4">
+        <BrandLogo light />
+        <p className="max-w-xs text-xs leading-relaxed text-white/65">
+          {env.instituteName} is a premier AI-enabled tech institute dedicated to preparing the next generation of data scientists and developers
+          through supervised ML methodologies.
         </p>
-        <p className="text-slate-500">Predictions are an analytical aid and do not replace academic judgement.</p>
+        <ul className="space-y-2.5 text-xs">
+          <li className="flex items-start gap-2.5">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-sun-300" />
+            {env.contactAddress}
+          </li>
+          <li className="flex items-center gap-2.5">
+            <Mail className="h-4 w-4 shrink-0 text-sun-300" />
+            <a href={`mailto:${env.contactEmail}`} className="hover:text-white">
+              {env.contactEmail}
+            </a>
+          </li>
+          <li className="flex items-center gap-2.5">
+            <Phone className="h-4 w-4 shrink-0 text-sun-300" />
+            <a href={`tel:${env.contactPhone.replace(/\s/g, '')}`} className="hover:text-white">
+              {env.contactPhone}
+            </a>
+          </li>
+        </ul>
       </div>
+      <div>
+        <h2 className="mb-4 font-display text-sm font-semibold text-white">Academic Programs</h2>
+        <ul className="space-y-2.5 text-xs">
+          {PROGRAMS.map((item) => (
+            <li key={item}>
+              <Link to={`${PATHS.courses}?search=${encodeURIComponent(item.split(' ')[0] ?? item)}`} className="transition-colors hover:text-white">
+                {item}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2 className="mb-4 font-display text-sm font-semibold text-white">SEO Targeted Tracks</h2>
+        <ul className="space-y-2.5 text-xs">
+          {TRACKS.map((item) => (
+            <li key={item}>
+              <Link to={PATHS.courses} className="transition-colors hover:text-white">
+                {item}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2 className="mb-4 font-display text-sm font-semibold text-white">Direct Portals</h2>
+        <ul className="space-y-2.5 text-xs">
+          {PORTALS.map((item) => (
+            <li key={item.label}>
+              <Link to={item.to} className="transition-colors hover:text-white">
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+    <div className="container-page border-t border-white/10 py-6 text-[11px] text-white/50">
+      © {new Date().getFullYear()} {env.instituteName}. All rights reserved. Built with precision for the {env.appName} Ecosystem.
     </div>
   </footer>
 );

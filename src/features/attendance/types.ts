@@ -1,54 +1,46 @@
-import type { CourseRef, ListParams, StudentRef } from '@/types';
+import type { AttendanceProgress, CourseRef, ListParams, StudentRef } from '@/types';
 
-export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+export type AttendanceStatus = 'PRESENT' | 'LATE' | 'ABSENT';
 
 export const ATTENDANCE_STATUSES: { value: AttendanceStatus; label: string }[] = [
   { value: 'PRESENT', label: 'Present' },
-  { value: 'ABSENT', label: 'Absent' },
   { value: 'LATE', label: 'Late' },
-  { value: 'EXCUSED', label: 'Excused' },
+  { value: 'ABSENT', label: 'Absent' },
 ];
 
 export interface AttendanceRecord {
   id: number;
-  enrolment?: number;
-  student?: StudentRef;
-  course?: CourseRef;
-  session_date: string;
-  session_topic?: string | null;
+  enrolment: number;
+  student: StudentRef;
+  course: CourseRef;
+  date: string;
   status: AttendanceStatus | (string & {});
-  status_display?: string;
-  remarks?: string | null;
-  marked_by?: { id: string; full_name: string } | null;
-  created_at?: string;
+  status_display: string;
+  remarks: string;
+  marked_by: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface AttendanceSummary {
+export interface StudentAttendanceCourse {
+  enrolment_id: number;
   course: CourseRef;
-  total_sessions: number;
-  present: number;
-  absent: number;
-  late?: number;
-  excused?: number;
-  attendance_percentage: number;
+  summary: AttendanceProgress;
+  records: { id: number; date: string; status: AttendanceStatus | (string & {}); status_display: string; remarks: string }[];
+}
+
+export interface AttendanceSummaryData {
+  course: CourseRef;
+  students: ({ enrolment_id: number; student: StudentRef } & AttendanceProgress)[];
 }
 
 export interface AttendanceListParams extends ListParams {
   course?: string;
-  session_date?: string;
+  date?: string;
   status?: string;
-  student?: string;
 }
 
 export interface MarkAttendancePayload {
-  enrolment: number;
-  session_date: string;
-  session_topic?: string;
-  status: AttendanceStatus;
-  remarks?: string;
-}
-
-export interface UpdateAttendancePayload {
-  status?: AttendanceStatus;
-  remarks?: string;
+  date: string;
+  records: { enrolment: number; status: AttendanceStatus; remarks?: string }[];
 }

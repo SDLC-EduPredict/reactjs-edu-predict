@@ -1,10 +1,10 @@
-import type { CourseRef, ListParams, Paginated } from '@/types';
+import type { CourseRef, ListParams, UserRole } from '@/types';
 
 export const NOTIFICATION_TYPES = [
   { value: 'COURSE', label: 'Course' },
   { value: 'ASSIGNMENT', label: 'Assignment' },
   { value: 'ASSESSMENT', label: 'Assessment' },
-  { value: 'ACADEMIC_ALERT', label: 'Academic alert' },
+  { value: 'ACADEMIC_ALERT', label: 'Academic Alert' },
   { value: 'ADMINISTRATIVE', label: 'Administrative' },
 ] as const;
 
@@ -22,19 +22,19 @@ export type NotificationAudience = (typeof NOTIFICATION_AUDIENCES)[number]['valu
 
 export interface AppNotification {
   id: number;
+  notification_type: NotificationType | (string & {});
+  notification_type_display: string;
   title: string;
   message: string;
-  notification_type: NotificationType | (string & {});
-  notification_type_display?: string;
-  course?: CourseRef | null;
-  link?: string | null;
+  course: CourseRef | null;
+  sent_by: string | null;
   is_read: boolean;
-  read_at?: string | null;
+  read_at: string | null;
   created_at: string;
 }
 
-export interface NotificationList extends Paginated<AppNotification> {
-  unread_count?: number;
+export interface AdminNotification extends AppNotification {
+  recipient: { id: string; full_name: string; email: string; role: UserRole | (string & {}) };
 }
 
 export interface NotificationListParams extends ListParams {
@@ -43,29 +43,15 @@ export interface NotificationListParams extends ListParams {
   course?: string;
 }
 
-export interface UnreadCountData {
-  unread_count: number;
+export interface AdminNotificationListParams extends NotificationListParams {
+  recipient?: string;
 }
 
-export interface BroadcastNotification {
-  id: number;
-  title: string;
-  message: string;
-  notification_type: NotificationType | (string & {});
-  notification_type_display?: string;
-  audience: NotificationAudience | (string & {});
-  audience_display?: string;
-  course?: CourseRef | null;
-  recipient_count?: number;
-  created_by?: { id: string; full_name: string } | null;
-  created_at: string;
-}
-
-export interface BroadcastPayload {
-  title: string;
-  message: string;
-  notification_type: NotificationType;
+export interface SendNotificationPayload {
   audience: NotificationAudience;
+  notification_type?: NotificationType;
+  title: string;
+  message: string;
   course?: number;
   user?: string;
 }

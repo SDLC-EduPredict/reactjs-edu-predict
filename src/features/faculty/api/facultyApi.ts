@@ -3,41 +3,28 @@ import { api, toFormData } from '@/lib/api/request';
 import type { ListParams, Paginated, QueryParams } from '@/types';
 import type {
   AdminFaculty,
-  AdminFacultyData,
   CreateFacultyPayload,
   FacultyListParams,
-  FacultyProfileData,
+  FacultyProfile,
   PublicFaculty,
   PublicFacultyDetailData,
   UpdateFacultyPayload,
-  UpdateFacultyProfilePayload,
 } from '../types';
 
-const hasFile = (payload: { photo?: File | null }) => payload.photo instanceof File;
+const asMultipart = (payload: UpdateFacultyPayload) => toFormData({ ...payload });
 
 export const facultyApi = {
-  publicList: (params: ListParams) =>
-    api.get<Paginated<PublicFaculty>>(ENDPOINTS.catalog.faculty, params as QueryParams),
+  publicList: (params: ListParams) => api.get<Paginated<PublicFaculty>>(ENDPOINTS.catalog.faculty, params as QueryParams),
   publicDetail: (id: string) => api.get<PublicFacultyDetailData>(ENDPOINTS.catalog.facultyMember(id)),
-  profile: () => api.get<FacultyProfileData>(ENDPOINTS.faculty.profile),
-  updateProfile: (payload: UpdateFacultyProfilePayload) => {
-    const { photo, ...rest } = payload;
-    return api.patch<FacultyProfileData>(
-      ENDPOINTS.faculty.profile,
-      hasFile(payload) ? toFormData({ ...rest, photo }) : rest,
-    );
-  },
+  profile: () => api.get<{ profile: FacultyProfile }>(ENDPOINTS.faculty.profile),
+  updateProfile: (payload: UpdateFacultyPayload) =>
+    api.patch<{ profile: FacultyProfile }>(ENDPOINTS.faculty.profile, asMultipart(payload)),
   adminList: (params: FacultyListParams) =>
     api.get<Paginated<AdminFaculty>>(ENDPOINTS.admin.faculty, params as QueryParams),
-  adminDetail: (id: number) => api.get<AdminFacultyData>(ENDPOINTS.admin.facultyMember(id)),
+  adminDetail: (id: number) => api.get<{ faculty: AdminFaculty }>(ENDPOINTS.admin.facultyMember(id)),
   create: (payload: CreateFacultyPayload) =>
-    api.post<AdminFacultyData, CreateFacultyPayload>(ENDPOINTS.admin.faculty, payload),
-  update: ({ id, ...payload }: UpdateFacultyPayload & { id: number }) => {
-    const { photo, ...rest } = payload;
-    return api.patch<AdminFacultyData>(
-      ENDPOINTS.admin.facultyMember(id),
-      hasFile(payload) ? toFormData({ ...rest, photo }) : rest,
-    );
-  },
+    api.post<{ faculty: AdminFaculty }, CreateFacultyPayload>(ENDPOINTS.admin.faculty, payload),
+  update: ({ id, ...payload }: UpdateFacultyPayload & { id: number }) =>
+    api.patch<{ faculty: AdminFaculty }>(ENDPOINTS.admin.facultyMember(id), asMultipart(payload)),
   deactivate: (id: number) => api.delete(ENDPOINTS.admin.facultyMember(id)),
 };

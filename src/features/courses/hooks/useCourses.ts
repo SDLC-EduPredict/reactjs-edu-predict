@@ -20,19 +20,28 @@ export const useCourses = (params: CourseListParams) =>
     select: (result) => result.data,
   });
 
-export const useCourse = (idOrSlug: string | undefined) =>
+export const useCourse = (idOrSlug: string | number | null | undefined) =>
   useQuery({
     queryKey: queryKeys.catalog.course(idOrSlug ?? ''),
     queryFn: () => catalogApi.course(idOrSlug ?? ''),
-    enabled: Boolean(idOrSlug),
+    enabled: idOrSlug !== null && idOrSlug !== undefined && idOrSlug !== '',
     select: (result) => result.data.course,
   });
 
-export const useAdminCategories = () =>
+export const useAdminCategories = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.admin.categories,
+    enabled,
     queryFn: adminCatalogApi.categories,
     select: (result) => result.data.categories,
+  });
+
+export const useAdminCategory = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.admin.category(id ?? 0),
+    queryFn: () => adminCatalogApi.category(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.category,
   });
 
 const useCatalogInvalidation = () => {
@@ -72,12 +81,21 @@ export const useDeleteCategory = () => {
   });
 };
 
-export const useAdminCourses = (params: CourseListParams) =>
+export const useAdminCourses = (params: CourseListParams, enabled = true) =>
   useQuery({
     queryKey: queryKeys.admin.courses(params as QueryParams),
+    enabled,
     queryFn: () => adminCatalogApi.courses(params),
     placeholderData: keepPreviousData,
     select: (result) => result.data,
+  });
+
+export const useAdminCourse = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.admin.course(id ?? 0),
+    queryFn: () => adminCatalogApi.course(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.course,
   });
 
 export const useCreateCourse = () => {
@@ -102,15 +120,7 @@ export const useDeleteCourse = () => {
   const invalidate = useCatalogInvalidation();
   return useMutation({
     mutationFn: adminCatalogApi.deleteCourse,
-    meta: { successMessage: 'Course removed', errorTitle: 'Could not remove course' },
+    meta: { successMessage: 'Course deleted', errorTitle: 'Could not delete course' },
     onSuccess: invalidate,
   });
-};
-
-export const useCourseOptions = () => {
-  const query = useCourses({ page: 1, page_size: 100 });
-  return {
-    ...query,
-    options: (query.data?.results ?? []).map((course) => ({ value: course.id, label: course.title })),
-  };
 };

@@ -1,44 +1,64 @@
-import type { CourseRef, ListParams, StudentRef } from '@/types';
+import type { AssessmentProgress, CourseRef, ListParams, StudentRef } from '@/types';
 
-export type AssessmentType = 'MOCK_TEST' | 'QUIZ' | 'MIDTERM' | 'FINAL';
+export type AssessmentType = 'MOCK_TEST' | 'EXAM';
 
 export const ASSESSMENT_TYPES: { value: AssessmentType; label: string }[] = [
-  { value: 'MOCK_TEST', label: 'Mock test' },
-  { value: 'QUIZ', label: 'Module quiz' },
-  { value: 'MIDTERM', label: 'Mid-term exam' },
-  { value: 'FINAL', label: 'Final exam' },
+  { value: 'MOCK_TEST', label: 'Mock Test' },
+  { value: 'EXAM', label: 'Exam' },
 ];
 
 export interface Assessment {
   id: number;
   course: CourseRef;
   title: string;
-  description?: string;
   assessment_type: AssessmentType | (string & {});
-  assessment_type_display?: string;
-  scheduled_date: string;
-  duration_minutes: number;
-  total_marks: number;
-  passing_marks?: number;
-  is_published: boolean;
-  result_count?: number;
-  average_marks?: number | null;
-  created_at?: string;
+  assessment_type_display: string;
+  description: string;
+  assessment_date: string;
+  max_marks: number;
+  pass_marks: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AssessmentResult {
   id: number;
-  assessment: Pick<Assessment, 'id' | 'title' | 'assessment_type' | 'total_marks'> & {
-    assessment_type_display?: string;
-    scheduled_date?: string;
-    course?: CourseRef;
-  };
-  student?: StudentRef;
+  assessment: number;
+  enrolment: number;
+  student: StudentRef;
   marks_obtained: number;
-  percentage?: number;
-  is_passed?: boolean;
-  remarks?: string | null;
-  published_at?: string | null;
+  percentage: number;
+  result: 'PASS' | 'FAIL' | (string & {});
+  remarks: string;
+  entered_by: string | null;
+  updated_at: string;
+}
+
+export interface AssessmentResultsData {
+  assessment: Assessment;
+  students: { enrolment_id: number; student: StudentRef; result: AssessmentResult | null }[];
+}
+
+export interface StudentAssessmentItem {
+  id: number;
+  title: string;
+  assessment_type?: string;
+  assessment_type_display?: string;
+  assessment_date?: string;
+  max_marks?: number;
+  pass_marks?: number;
+  marks_obtained?: number | null;
+  percentage?: number | null;
+  result?: string | AssessmentResult | null;
+  remarks?: string;
+}
+
+export interface StudentResultsCourse {
+  enrolment_id: number;
+  course: CourseRef;
+  summary: AssessmentProgress;
+  assessments: StudentAssessmentItem[];
 }
 
 export interface AssessmentListParams extends ListParams {
@@ -51,15 +71,11 @@ export interface AssessmentPayload {
   title: string;
   description: string;
   assessment_type: AssessmentType;
-  scheduled_date: string;
-  duration_minutes: number;
-  total_marks: number;
-  passing_marks: number;
-  is_published: boolean;
+  assessment_date: string;
+  max_marks: number;
+  pass_marks: number;
 }
 
-export interface RecordResultPayload {
-  enrolment: number;
-  marks_obtained: number;
-  remarks?: string;
+export interface EnterMarksPayload {
+  records: { enrolment: number; marks_obtained: number; remarks?: string }[];
 }

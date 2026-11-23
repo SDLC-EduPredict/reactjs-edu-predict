@@ -1,60 +1,61 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { asList, isRecord } from '@/lib/api/normalize';
 import { queryKeys } from '@/lib/query/queryKeys';
 import type { QueryParams } from '@/types';
 import { attendanceApi } from '../api/attendanceApi';
-import type { AttendanceListParams, AttendanceRecord, AttendanceSummary, MarkAttendancePayload } from '../types';
+import type { AttendanceListParams } from '../types';
 
-export interface StudentAttendanceView {
-  summary: AttendanceSummary[];
-  records: AttendanceRecord[];
-  overall: number | null;
-}
-
-export const useMyAttendance = (params: QueryParams = {}) =>
+export const useMyAttendance = (enabled = true) =>
   useQuery({
-    queryKey: queryKeys.studentPortal.attendance(params),
-    queryFn: () => attendanceApi.mine(params),
-    select: (result): StudentAttendanceView => {
-      const data = result.data;
-      const summary = asList<AttendanceSummary>(data, ['summary', 'courses']);
-      const records = asList<AttendanceRecord>(data, ['records', 'attendance']);
-      const overallValue = isRecord(data) ? data.overall_percentage ?? data.attendance_percentage : null;
-      const overall =
-        typeof overallValue === 'number'
-          ? overallValue
-          : summary.length
-            ? summary.reduce((sum, item) => sum + item.attendance_percentage, 0) / summary.length
-            : null;
-      return { summary, records, overall };
-    },
+    queryKey: queryKeys.studentPortal.attendance,
+    enabled,
+    queryFn: attendanceApi.mine,
+    select: (result) => result.data.courses,
   });
 
-export const useAttendanceRecords = (params: AttendanceListParams, enabled = true) =>
+export const useAttendanceRecords = (params: AttendanceListParams) =>
   useQuery({
-    queryKey: queryKeys.academics.attendance(params as QueryParams),
+    queryKey: queryKeys.attendance.list(params as QueryParams),
     queryFn: () => attendanceApi.list(params),
-    enabled,
     placeholderData: keepPreviousData,
     select: (result) => result.data,
   });
 
-const useInvalidateAttendance = () => {
+export const useAttendanceSummary = (courseId: number | null) =>
+  useQuery({
+    queryKey: queryKeys.attendance.summary(courseId ?? 0),
+    queryFn: () => attendanceApi.summary(courseId ?? 0),
+    enabled: courseId !== null,
+    select: (result) => result.data,
+  });
+
+export const useAttendanceRecord = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.attendance.detail(id ?? 0),
+    queryFn: () => attendanceApi.detail(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.attendance,
+  });
+
+const useInvalidate = () => {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: queryKeys.academics.attendanceAll });
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.attendance.all }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.performance.all }),
+    ]);
 };
 
-export const useMarkAttendanceBatch = () => {
-  const invalidate = useInvalidateAttendance();
+export const useMarkAttendance = () => {
+  const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: (records: MarkAttendancePayload[]) => Promise.all(records.map((record) => attendanceApi.mark(record))),
+    mutationFn: attendanceApi.mark,
     meta: { successMessage: 'Attendance saved', errorTitle: 'Could not save attendance' },
     onSuccess: invalidate,
   });
 };
 
 export const useUpdateAttendance = () => {
-  const invalidate = useInvalidateAttendance();
+  const invalidate = useInvalidate();
   return useMutation({
     mutationFn: attendanceApi.update,
     meta: { successMessage: 'Attendance updated', errorTitle: 'Could not update attendance' },
@@ -63,10 +64,10 @@ export const useUpdateAttendance = () => {
 };
 
 export const useDeleteAttendance = () => {
-  const invalidate = useInvalidateAttendance();
+  const invalidate = useInvalidate();
   return useMutation({
     mutationFn: attendanceApi.remove,
-    meta: { successMessage: 'Attendance record removed' },
+    meta: { successMessage: 'Attendance record deleted', errorTitle: 'Could not delete record' },
     onSuccess: invalidate,
   });
 };

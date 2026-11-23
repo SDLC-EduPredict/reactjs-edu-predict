@@ -2,7 +2,7 @@ import type { CategoryRef, FacultyRef, ListParams } from '@/types';
 
 export type CourseLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 export type CourseMode = 'ONLINE' | 'OFFLINE' | 'HYBRID';
-export type CourseStatus = 'DRAFT' | 'ACTIVE' | 'UPCOMING' | 'ARCHIVED';
+export type CourseStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
 export const COURSE_LEVELS: { value: CourseLevel; label: string }[] = [
   { value: 'BEGINNER', label: 'Beginner' },
@@ -12,14 +12,13 @@ export const COURSE_LEVELS: { value: CourseLevel; label: string }[] = [
 
 export const COURSE_MODES: { value: CourseMode; label: string }[] = [
   { value: 'ONLINE', label: 'Online' },
-  { value: 'OFFLINE', label: 'Classroom' },
+  { value: 'OFFLINE', label: 'Offline' },
   { value: 'HYBRID', label: 'Hybrid' },
 ];
 
 export const COURSE_STATUSES: { value: CourseStatus; label: string }[] = [
   { value: 'DRAFT', label: 'Draft' },
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'UPCOMING', label: 'Upcoming' },
+  { value: 'PUBLISHED', label: 'Published' },
   { value: 'ARCHIVED', label: 'Archived' },
 ];
 
@@ -36,6 +35,17 @@ export interface Category {
 
 export interface CategoriesData {
   categories: Category[];
+}
+
+export interface CategoryData {
+  category: Category;
+}
+
+export interface CategoryPayload {
+  name: string;
+  slug: string;
+  description: string;
+  is_active: boolean;
 }
 
 export interface Course {
@@ -66,7 +76,7 @@ export interface CourseDetail extends Course {
   updated_at: string;
 }
 
-export interface CourseDetailData {
+export interface CourseData {
   course: CourseDetail;
 }
 
@@ -75,30 +85,20 @@ export interface CourseListParams extends ListParams {
   level?: string;
   mode?: string;
   status?: string;
-  faculty?: string;
-}
-
-export interface CategoryPayload {
-  name: string;
-  description: string;
-  is_active: boolean;
-}
-
-export interface CategoryData {
-  category: Category;
 }
 
 export interface CoursePayload {
-  title: string;
-  short_description: string;
-  description: string;
   category: number;
   faculty: string | null;
+  title: string;
+  slug: string;
+  short_description: string;
+  description: string;
   level: CourseLevel;
   mode: CourseMode;
   duration_weeks: number;
   total_modules: number;
-  fee: number;
+  fee: string;
   start_date: string;
   status: CourseStatus;
   meta_title: string;

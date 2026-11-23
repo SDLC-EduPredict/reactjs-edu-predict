@@ -2,30 +2,29 @@ import { ENDPOINTS } from '@/lib/api/endpoints';
 import { api, toFormData } from '@/lib/api/request';
 import type { Paginated, QueryParams } from '@/types';
 import type {
-  AdminStudentData,
   CreateStudentPayload,
+  StudentDashboardData,
   StudentListParams,
   StudentProfile,
   StudentProfileData,
-  UpdateOwnStudentProfilePayload,
+  UpdateOwnProfilePayload,
   UpdateStudentPayload,
 } from '../types';
 
 export const studentsApi = {
   ownProfile: () => api.get<StudentProfileData>(ENDPOINTS.student.profile),
-  updateOwnProfile: (payload: UpdateOwnStudentProfilePayload) => {
-    const { photo, ...rest } = payload;
-    return api.patch<StudentProfileData>(
+  updateOwnProfile: (payload: UpdateOwnProfilePayload) =>
+    api.patch<StudentProfileData>(
       ENDPOINTS.student.profile,
-      photo instanceof File ? toFormData({ ...rest, photo }) : rest,
-    );
-  },
+      payload.photo instanceof File ? toFormData({ ...payload }) : { ...payload, photo: undefined },
+    ),
+  dashboard: () => api.get<StudentDashboardData>(ENDPOINTS.student.dashboard),
   adminList: (params: StudentListParams) =>
     api.get<Paginated<StudentProfile>>(ENDPOINTS.admin.students, params as QueryParams),
-  adminDetail: (id: number) => api.get<AdminStudentData>(ENDPOINTS.admin.student(id)),
+  adminDetail: (id: number) => api.get<StudentProfileData>(ENDPOINTS.admin.student(id)),
   create: (payload: CreateStudentPayload) =>
-    api.post<AdminStudentData, CreateStudentPayload>(ENDPOINTS.admin.students, payload),
+    api.post<StudentProfileData, CreateStudentPayload>(ENDPOINTS.admin.students, payload),
   update: ({ id, ...payload }: UpdateStudentPayload & { id: number }) =>
-    api.patch<AdminStudentData, UpdateStudentPayload>(ENDPOINTS.admin.student(id), payload),
+    api.patch<StudentProfileData, UpdateStudentPayload>(ENDPOINTS.admin.student(id), payload),
   deactivate: (id: number) => api.delete(ENDPOINTS.admin.student(id)),
 };

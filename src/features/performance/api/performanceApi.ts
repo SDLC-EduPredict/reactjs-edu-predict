@@ -1,11 +1,24 @@
 import { ENDPOINTS } from '@/lib/api/endpoints';
-import { api } from '@/lib/api/request';
-import type { QueryParams } from '@/types';
-import type { MonitoredStudentListParams, StudentReport } from '../types';
+import { api, downloadFile } from '@/lib/api/request';
+import type { Paginated, QueryParams } from '@/types';
+import type {
+  PerformanceDataset,
+  PerformanceListParams,
+  PerformanceRecord,
+  PerformanceSummaryData,
+  StudentPerformanceData,
+  UpdatePerformancePayload,
+} from '../types';
 
 export const performanceApi = {
-  mine: () => api.get<unknown>(ENDPOINTS.student.performance),
-  monitoredStudents: (params: MonitoredStudentListParams) =>
-    api.get<unknown>(ENDPOINTS.faculty.students, params as QueryParams),
-  studentReport: (studentId: number) => api.get<StudentReport>(ENDPOINTS.faculty.student(studentId)),
+  mine: () => api.get<StudentPerformanceData>(ENDPOINTS.student.performance),
+  list: (params: PerformanceListParams) =>
+    api.get<Paginated<PerformanceRecord>>(ENDPOINTS.performance.list, params as QueryParams),
+  summary: (courseId: number) => api.get<PerformanceSummaryData>(ENDPOINTS.performance.summary, { course: courseId }),
+  dataset: (courseId: number | null) =>
+    api.get<PerformanceDataset>(courseId ? ENDPOINTS.performance.datasetFor(courseId) : ENDPOINTS.performance.dataset),
+  exportDataset: () => downloadFile(ENDPOINTS.performance.dataset, { export: 'csv' }, 'performance-dataset.csv'),
+  detail: (id: number) => api.get<{ performance: PerformanceRecord }>(ENDPOINTS.performance.detail(id)),
+  update: ({ id, ...payload }: UpdatePerformancePayload & { id: number }) =>
+    api.patch<{ performance: PerformanceRecord }, UpdatePerformancePayload>(ENDPOINTS.performance.detail(id), payload),
 };

@@ -33,14 +33,6 @@ export interface PublicFacultyDetailData {
   courses: Course[];
 }
 
-export interface FacultyProfileData {
-  profile: FacultyProfile;
-}
-
-export interface AdminFacultyData {
-  faculty: AdminFaculty;
-}
-
 export interface FacultyListParams extends ListParams {
   is_active?: string;
 }
@@ -61,16 +53,6 @@ export interface UpdateFacultyPayload {
   last_name?: string;
   phone?: string;
   is_active?: boolean;
-  designation?: string;
-  expertise?: string;
-  bio?: string;
-  photo?: File | null;
-}
-
-export interface UpdateFacultyProfilePayload {
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
   designation?: string;
   expertise?: string;
   bio?: string;

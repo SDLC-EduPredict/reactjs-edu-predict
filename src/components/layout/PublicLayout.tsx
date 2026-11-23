@@ -10,7 +10,7 @@ export const PublicLayout = () => {
     window.scrollTo({ top: 0 });
   }, [pathname]);
   return (
-    <div className="flex min-h-screen flex-col bg-page">
+    <div className="flex min-h-screen flex-col bg-white">
       <PublicNavbar />
       <main className="flex-1">
         <Suspense fallback={<PageLoader />}>

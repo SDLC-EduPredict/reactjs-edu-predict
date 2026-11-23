@@ -24,8 +24,8 @@ export const LoginPage = () => {
 
   return (
     <AuthShell
-      title="Welcome back"
-      subtitle="Log in as a student, faculty member or administrator."
+      title="Welcome Back !"
+      subtitle="Please enter your details."
       footer={
         <>
           New to the institute?{' '}

@@ -1,43 +1,70 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAppDispatch } from '@/app/store/hooks';
-import { asList, isRecord } from '@/lib/api/normalize';
 import { queryKeys } from '@/lib/query/queryKeys';
-import { predictionsApi } from '../api/predictionsApi';
+import type { QueryParams } from '@/types';
+import { mlApi } from '../api/mlApi';
 import { predictionReceived } from '../store/predictionSlice';
-import type { Prediction } from '../types';
+import type { PredictionListParams } from '../types';
 
-export interface StudentPredictionView {
-  latest: Prediction | null;
-  history: Prediction[];
-}
-
-const toPredictionView = (data: unknown): StudentPredictionView => {
-  const history = asList<Prediction>(data, ['predictions', 'history']);
-  const candidate = isRecord(data) ? (data.latest ?? data.prediction) : null;
-  const latest = isRecord(candidate) ? (candidate as unknown as Prediction) : (history[0] ?? null);
-  return { latest, history };
-};
-
-export const useStudentPrediction = (studentId: number | string | null | undefined) =>
+export const useMyPredictions = (course?: number) =>
   useQuery({
-    queryKey: queryKeys.ml.prediction(studentId ?? ''),
-    queryFn: () => predictionsApi.forStudent(studentId ?? ''),
-    enabled: studentId !== null && studentId !== undefined && studentId !== '',
-    select: (result) => toPredictionView(result.data),
+    queryKey: queryKeys.studentPortal.prediction({ course }),
+    queryFn: () => mlApi.mine(course),
+    select: (result) => result.data,
+  });
+
+export const usePredictionList = (params: PredictionListParams, enabled = true) =>
+  useQuery({
+    queryKey: queryKeys.ml.predictions(params as QueryParams),
+    queryFn: () => mlApi.predictions(params),
+    enabled,
+    placeholderData: keepPreviousData,
+    select: (result) => result.data,
+  });
+
+export const useStudentPrediction = (studentId: number | null) =>
+  useQuery({
+    queryKey: queryKeys.ml.studentPrediction(studentId ?? 0),
+    queryFn: () => mlApi.studentPrediction(studentId ?? 0),
+    enabled: studentId !== null,
+    select: (result) => result.data,
   });
 
 export const usePredict = () => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: predictionsApi.predict,
+    mutationFn: mlApi.predict,
     meta: { successMessage: 'Prediction generated', errorTitle: 'Prediction failed' },
-    onSuccess: (result, variables) => {
-      dispatch(predictionReceived(result.data.prediction));
-      if (variables.student_id) {
-        return queryClient.invalidateQueries({ queryKey: queryKeys.ml.prediction(variables.student_id) });
-      }
-      return undefined;
+    onSuccess: (result) => {
+      dispatch(predictionReceived(result.data));
+      return queryClient.invalidateQueries({ queryKey: queryKeys.ml.all });
     },
+  });
+};
+
+export const useModels = (enabled = true) =>
+  useQuery({
+    queryKey: queryKeys.ml.models,
+    queryFn: mlApi.models,
+    enabled,
+    select: (result) => result.data,
+  });
+
+export const useTrainModel = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mlApi.train,
+    meta: { successMessage: 'Model trained successfully', errorTitle: 'Training failed' },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.ml.all }),
+  });
+};
+
+export const useActivateModel = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mlApi.activate,
+    meta: { successMessage: 'Model activated', errorTitle: 'Could not activate model' },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.ml.all }),
   });
 };

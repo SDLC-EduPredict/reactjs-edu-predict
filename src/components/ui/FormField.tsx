@@ -2,7 +2,7 @@ import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAt
 import { cn } from '@/lib/utils/cn';
 
 const control =
-  'w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition focus:outline-none focus:ring-2 disabled:bg-slate-50 disabled:text-slate-500';
+  'w-full rounded-xl border bg-slate-50/70 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 transition focus:outline-none focus:ring-2 focus:bg-white disabled:bg-slate-100 disabled:text-slate-500';
 const tone = (invalid?: boolean) =>
   invalid
     ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
@@ -73,11 +73,12 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
   label?: string;
   error?: string;
   hint?: string;
+  containerClassName?: string;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ label, error, hint, id, name, required, className, rows = 4, ...rest }, ref) => (
-    <Field label={label} htmlFor={id ?? name} error={error} hint={hint} required={required}>
+  ({ label, error, hint, id, name, required, className, containerClassName, rows = 4, ...rest }, ref) => (
+    <Field label={label} htmlFor={id ?? name} error={error} hint={hint} required={required} className={containerClassName}>
       <textarea
         ref={ref}
         id={id ?? name}

@@ -6,19 +6,23 @@ import type {
   AssessmentListParams,
   AssessmentPayload,
   AssessmentResult,
-  RecordResultPayload,
+  AssessmentResultsData,
+  EnterMarksPayload,
+  StudentResultsCourse,
 } from '../types';
 
 export const assessmentsApi = {
-  myResults: (params: QueryParams) => api.get<unknown>(ENDPOINTS.student.results, params),
+  myResults: () => api.get<{ courses: StudentResultsCourse[] }>(ENDPOINTS.student.results),
   list: (params: AssessmentListParams) =>
-    api.get<Paginated<Assessment>>(ENDPOINTS.academics.assessments, params as QueryParams),
+    api.get<Paginated<Assessment>>(ENDPOINTS.assessments.list, params as QueryParams),
+  detail: (id: number) => api.get<{ assessment: Assessment }>(ENDPOINTS.assessments.detail(id)),
   create: (payload: AssessmentPayload) =>
-    api.post<{ assessment: Assessment }, AssessmentPayload>(ENDPOINTS.academics.assessments, payload),
+    api.post<{ assessment: Assessment }, AssessmentPayload>(ENDPOINTS.assessments.list, payload),
   update: ({ id, ...payload }: Partial<AssessmentPayload> & { id: number }) =>
-    api.patch<{ assessment: Assessment }>(ENDPOINTS.academics.assessment(id), payload),
-  remove: (id: number) => api.delete(ENDPOINTS.academics.assessment(id)),
-  results: (assessmentId: number) => api.get<unknown>(ENDPOINTS.academics.assessmentResults(assessmentId)),
-  recordResult: ({ assessmentId, ...payload }: RecordResultPayload & { assessmentId: number }) =>
-    api.post<{ result: AssessmentResult }, RecordResultPayload>(ENDPOINTS.academics.assessmentResults(assessmentId), payload),
+    api.patch<{ assessment: Assessment }>(ENDPOINTS.assessments.detail(id), payload),
+  remove: (id: number) => api.delete(ENDPOINTS.assessments.detail(id)),
+  results: (id: number) => api.get<AssessmentResultsData>(ENDPOINTS.assessments.results(id)),
+  enterMarks: ({ id, ...payload }: EnterMarksPayload & { id: number }) =>
+    api.post<{ results: AssessmentResult[] }, EnterMarksPayload>(ENDPOINTS.assessments.results(id), payload),
+  deleteResult: (resultId: number) => api.delete(ENDPOINTS.assessments.result(resultId)),
 };

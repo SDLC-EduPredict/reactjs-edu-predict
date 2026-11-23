@@ -1,66 +1,45 @@
-import { BrainCircuit } from 'lucide-react';
-import { Card, CardBody, CardHeader, EmptyState } from '@/components/ui';
+import type { ReactNode } from 'react';
+import { AlertCircle, BrainCircuit } from 'lucide-react';
 import { ScoreGauge } from '@/components/charts/ScoreGauge';
-import { formatDate, formatNumber, humanize } from '@/lib/utils/format';
-import { IndicatorBadge } from '@/features/performance/components/IndicatorBadge';
+import { IndicatorBadge } from '@/components/domain/IndicatorBadge';
+import { Meter } from '@/components/domain/Metric';
+import { formatDate, humanize } from '@/lib/utils/format';
 import { FEATURE_KEYS, FEATURE_META } from '../constants';
-import type { Prediction } from '../types';
+import type { CoursePrediction } from '../types';
 
-export const PredictionCard = ({ prediction, title = 'Performance prediction' }: { prediction: Prediction | null; title?: string }) => (
-  <Card>
-    <CardHeader icon={<BrainCircuit className="h-4 w-4" />} title={title} description={prediction?.created_at ? `Generated ${formatDate(prediction.created_at, true)}` : 'Linear Regression model'} />
-    {prediction ? (
-      <CardBody className="grid gap-6 md:grid-cols-[200px_1fr] md:items-center">
-        <div className="flex flex-col items-center gap-3">
-          <ScoreGauge score={prediction.predicted_score} label="Predicted final score" />
-          <IndicatorBadge indicator={prediction.indicator} label={prediction.indicator_display} />
-        </div>
-        <div className="space-y-4">
-          {prediction.features && (
-            <dl className="grid grid-cols-2 gap-2 text-xs">
-              {FEATURE_KEYS.filter((key) => prediction.features?.[key] !== undefined).map((key) => (
-                <div key={key} className="rounded-xl bg-slate-50 px-3 py-2">
-                  <dt className="text-slate-500">{FEATURE_META[key].label}</dt>
-                  <dd className="font-bold text-slate-900">
-                    {formatNumber(prediction.features?.[key], 0)}
-                    {FEATURE_META[key].unit}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
-          {prediction.contributions && prediction.contributions.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-bold text-slate-700">What drives this score</p>
-              <ul className="space-y-1.5">
-                {prediction.contributions.map((item) => (
-                  <li key={item.feature} className="flex items-center justify-between text-xs">
-                    <span className="text-slate-600">{item.label ?? humanize(item.feature)}</span>
-                    <span className={(item.contribution ?? 0) >= 0 ? 'font-semibold text-emerald-600' : 'font-semibold text-rose-600'}>
-                      {(item.contribution ?? 0) >= 0 ? '+' : ''}
-                      {formatNumber(item.contribution ?? item.value, 2)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {prediction.reasons && prediction.reasons.length > 0 && (
-            <ul className="list-disc space-y-1 pl-4 text-xs text-amber-700">
-              {prediction.reasons.map((reason) => (
-                <li key={reason}>{reason}</li>
-              ))}
-            </ul>
-          )}
-          <p className="text-[11px] text-slate-400">
-            This prediction is an analytical aid and not a guarantee of your final result.
-            {prediction.model_version ? ` Model ${prediction.model_version}.` : ''}
-            {prediction.metrics?.r2 !== undefined ? ` R² ${formatNumber(prediction.metrics.r2, 3)}.` : ''}
-          </p>
-        </div>
-      </CardBody>
-    ) : (
-      <EmptyState icon={<BrainCircuit className="h-6 w-6" />} title="No prediction yet" description="A prediction appears once enough attendance, assignment and test data is available." />
+/** Navy “Linear Regression score forecast” card used by students and staff. */
+export const PredictionCard = ({ item, action }: { item: CoursePrediction; action?: ReactNode }) => (
+  <div className="navy-panel rounded-3xl p-6 text-white shadow-lift">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-sun-300">
+          <BrainCircuit className="h-3.5 w-3.5" /> Linear Regression Score Forecast
+        </p>
+        <h3 className="mt-1 font-display text-lg font-semibold">{item.course.title}</h3>
+      </div>
+      {item.prediction && <IndicatorBadge indicator={item.prediction.indicator} label={item.prediction.indicator_display} />}
+    </div>
+    <div className="mt-5 grid items-center gap-6 sm:grid-cols-[auto_1fr]">
+      <div className="flex flex-col items-center rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+        <ScoreGauge dark score={item.prediction?.predicted_final_score} label="Predicted final score" size={170} />
+        <p className="mt-1 text-[11px] text-white/50">{item.prediction ? `Updated ${formatDate(item.prediction.updated_at, true)}` : 'Not predicted yet'}</p>
+      </div>
+      <div className="space-y-3">
+        {FEATURE_KEYS.map((key) => (
+          <Meter key={key} dark label={FEATURE_META[key].label} value={item.features[key]} max={FEATURE_META[key].max} suffix={FEATURE_META[key].unit.trim()} />
+        ))}
+      </div>
+    </div>
+    {item.missing_features.length > 0 && (
+      <p className="mt-4 flex items-start gap-2 rounded-xl bg-sun-300/10 p-3 text-xs text-sun-200">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> Missing data: {item.missing_features.map(humanize).join(', ')}. The forecast becomes more accurate as these are recorded.
+      </p>
     )}
-  </Card>
+    {item.prediction?.model_version && (
+      <p className="mt-3 text-[11px] text-white/50">
+        Model: {item.prediction.model_version.name} · R² {item.prediction.model_version.r2_score.toFixed(3)} · RMSE {item.prediction.model_version.rmse.toFixed(2)}
+      </p>
+    )}
+    {action && <div className="mt-4">{action}</div>}
+  </div>
 );

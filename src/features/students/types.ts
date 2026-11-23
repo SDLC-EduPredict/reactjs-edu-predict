@@ -1,19 +1,27 @@
+import type { Course } from '@/features/courses/types';
 import type { ListParams, User } from '@/types';
+
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+
+export const GENDERS: { value: Gender; label: string }[] = [
+  { value: 'MALE', label: 'Male' },
+  { value: 'FEMALE', label: 'Female' },
+  { value: 'OTHER', label: 'Other' },
+];
 
 export interface StudentProfile {
   id: number;
   student_code: string;
   user: User;
-  date_of_birth?: string | null;
-  gender?: string | null;
-  address?: string | null;
-  city?: string | null;
-  qualification?: string | null;
-  institution?: string | null;
-  guardian_name?: string | null;
-  guardian_phone?: string | null;
-  photo?: string | null;
-  enrolment_count?: number;
+  date_of_birth: string | null;
+  gender: Gender | '' | (string & {});
+  gender_display: string;
+  highest_qualification: string;
+  address: string;
+  city: string;
+  photo: string | null;
+  profile_completion: number;
+  missing_profile_fields: string[];
   created_at: string;
   updated_at: string;
 }
@@ -22,24 +30,30 @@ export interface StudentProfileData {
   profile: StudentProfile;
 }
 
-export interface AdminStudentData {
-  student: StudentProfile;
-}
-
-export interface StudentListParams extends ListParams {
-  is_active?: string;
-  course?: string;
+export interface StudentDashboardData {
+  profile: StudentProfile;
+  summary: {
+    profile_completion: number;
+    email_verified: boolean;
+    available_courses: number;
+    course_categories: number;
+  };
+  latest_courses: Course[];
 }
 
 export interface StudentProfileFields {
-  date_of_birth?: string;
+  date_of_birth?: string | null;
   gender?: string;
+  highest_qualification?: string;
   address?: string;
   city?: string;
-  qualification?: string;
-  institution?: string;
-  guardian_name?: string;
-  guardian_phone?: string;
+}
+
+export interface UpdateOwnProfilePayload extends StudentProfileFields {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  photo?: File | null;
 }
 
 export interface CreateStudentPayload extends StudentProfileFields {
@@ -57,6 +71,6 @@ export interface UpdateStudentPayload extends StudentProfileFields {
   is_active?: boolean;
 }
 
-export interface UpdateOwnStudentProfilePayload extends StudentProfileFields {
-  photo?: File | null;
+export interface StudentListParams extends ListParams {
+  is_active?: string;
 }

@@ -1,37 +1,64 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { asCount, asList } from '@/lib/api/normalize';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query/queryKeys';
 import type { QueryParams } from '@/types';
 import { performanceApi } from '../api/performanceApi';
-import type { MonitoredStudent, MonitoredStudentListParams, PerformanceSnapshot } from '../types';
+import type { PerformanceListParams } from '../types';
 
 export const useMyPerformance = () =>
   useQuery({
     queryKey: queryKeys.studentPortal.performance,
     queryFn: performanceApi.mine,
-    select: (result) => asList<PerformanceSnapshot>(result.data, ['performance', 'performances', 'courses']),
-  });
-
-export const useMonitoredStudents = (params: MonitoredStudentListParams) =>
-  useQuery({
-    queryKey: queryKeys.facultyPortal.students(params as QueryParams),
-    queryFn: () => performanceApi.monitoredStudents(params),
-    placeholderData: keepPreviousData,
-    select: (result) => ({
-      rows: asList<MonitoredStudent>(result.data, ['students']),
-      count: asCount(result.data, ['students']),
-    }),
-  });
-
-export const useStudentReport = (studentId: number | null) =>
-  useQuery({
-    queryKey: queryKeys.facultyPortal.student(studentId ?? 0),
-    queryFn: () => performanceApi.studentReport(studentId ?? 0),
-    enabled: studentId !== null,
     select: (result) => result.data,
   });
 
-export const useCourseRoster = (courseId: string) => {
-  const query = useMonitoredStudents({ course: courseId, page: 1, page_size: 200 });
-  return { ...query, enabled: Boolean(courseId) };
+export const usePerformanceList = (params: PerformanceListParams, enabled = true) =>
+  useQuery({
+    queryKey: queryKeys.performance.list(params as QueryParams),
+    queryFn: () => performanceApi.list(params),
+    enabled,
+    placeholderData: keepPreviousData,
+    select: (result) => result.data,
+  });
+
+export const usePerformanceSummary = (courseId: number | null) =>
+  useQuery({
+    queryKey: queryKeys.performance.summary(courseId ?? 0),
+    queryFn: () => performanceApi.summary(courseId ?? 0),
+    enabled: courseId !== null,
+    select: (result) => result.data,
+  });
+
+export const usePerformanceDataset = (courseId: number | null, enabled = true) =>
+  useQuery({
+    queryKey: queryKeys.performance.dataset(courseId ?? 'all'),
+    queryFn: () => performanceApi.dataset(courseId),
+    enabled,
+    select: (result) => result.data,
+  });
+
+export const usePerformanceRecord = (id: number | null) =>
+  useQuery({
+    queryKey: queryKeys.performance.detail(id ?? 0),
+    queryFn: () => performanceApi.detail(id ?? 0),
+    enabled: id !== null,
+    select: (result) => result.data.performance,
+  });
+
+export const useUpdatePerformance = (silent = false) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: performanceApi.update,
+    meta: silent ? { silent: true } : { successMessage: 'Performance updated', errorTitle: 'Could not update performance' },
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.performance.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.ml.all }),
+      ]),
+  });
 };
+
+export const useExportDataset = () =>
+  useMutation({
+    mutationFn: performanceApi.exportDataset,
+    meta: { successMessage: 'Dataset downloaded', errorTitle: 'Export failed' },
+  });
