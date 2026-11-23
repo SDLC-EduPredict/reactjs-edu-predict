@@ -12,7 +12,7 @@ interface SectionHeadingProps {
 }
 
 export const SectionHeading = ({ eyebrow, title, description, align = 'left', action, className }: SectionHeadingProps) => (
-  <div className={cn('mb-10 flex flex-col gap-4', align === 'center' ? 'items-center text-center' : 'sm:flex-row sm:items-end sm:justify-between', className)}>
+  <div data-reveal="" className={cn('mb-10 flex flex-col gap-4', align === 'center' ? 'items-center text-center' : 'sm:flex-row sm:items-end sm:justify-between', className)}>
     <div className={cn(align === 'center' && 'flex flex-col items-center')}>
       {eyebrow && (
         <span className="eyebrow mb-4">

@@ -46,13 +46,13 @@ export const SiteFooter = () => (
           </li>
           <li className="flex items-center gap-2.5">
             <Mail className="h-4 w-4 shrink-0 text-sun-300" />
-            <a href={`mailto:${env.contactEmail}`} className="hover:text-white">
+            <a href={`mailto:${env.contactEmail}`} className="link-underline hover:text-white">
               {env.contactEmail}
             </a>
           </li>
           <li className="flex items-center gap-2.5">
             <Phone className="h-4 w-4 shrink-0 text-sun-300" />
-            <a href={`tel:${env.contactPhone.replace(/\s/g, '')}`} className="hover:text-white">
+            <a href={`tel:${env.contactPhone.replace(/\s/g, '')}`} className="link-underline hover:text-white">
               {env.contactPhone}
             </a>
           </li>
@@ -63,7 +63,7 @@ export const SiteFooter = () => (
         <ul className="space-y-2.5 text-xs">
           {PROGRAMS.map((item) => (
             <li key={item}>
-              <Link to={`${PATHS.courses}?search=${encodeURIComponent(item.split(' ')[0] ?? item)}`} className="transition-colors hover:text-white">
+              <Link to={`${PATHS.courses}?search=${encodeURIComponent(item.split(' ')[0] ?? item)}`} className="link-underline hover:text-white">
                 {item}
               </Link>
             </li>
@@ -75,7 +75,7 @@ export const SiteFooter = () => (
         <ul className="space-y-2.5 text-xs">
           {TRACKS.map((item) => (
             <li key={item}>
-              <Link to={PATHS.courses} className="transition-colors hover:text-white">
+              <Link to={PATHS.courses} className="link-underline hover:text-white">
                 {item}
               </Link>
             </li>
@@ -87,7 +87,7 @@ export const SiteFooter = () => (
         <ul className="space-y-2.5 text-xs">
           {PORTALS.map((item) => (
             <li key={item.label}>
-              <Link to={item.to} className="transition-colors hover:text-white">
+              <Link to={item.to} className="link-underline hover:text-white">
                 {item.label}
               </Link>
             </li>

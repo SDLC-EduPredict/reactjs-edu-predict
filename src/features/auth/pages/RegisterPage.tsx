@@ -43,7 +43,7 @@ export const RegisterPage = () => {
       footer={
         <>
           Already registered?{' '}
-          <Link to={PATHS.login} className="font-semibold text-brand-700 hover:underline">
+          <Link to={PATHS.login} viewTransition className="font-semibold text-brand-700 hover:underline">
             Sign in here
           </Link>
         </>

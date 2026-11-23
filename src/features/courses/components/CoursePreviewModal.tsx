@@ -179,7 +179,7 @@ export const CoursePreviewModal = () => {
   if (!slug) return null;
   return createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm sm:p-8" role="dialog" aria-modal="true" onClick={close}>
-      <div className="mx-auto max-w-2xl animate-toast-in" onClick={(event) => event.stopPropagation()}>
+      <div className="mx-auto max-w-2xl animate-modal-in" onClick={(event) => event.stopPropagation()}>
         {course.isPending ? (
           <div className="rounded-3xl bg-white p-16">
             <Spinner label="Loading course…" />

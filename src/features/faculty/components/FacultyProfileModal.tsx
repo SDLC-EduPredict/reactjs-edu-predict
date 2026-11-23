@@ -27,7 +27,7 @@ export const FacultyProfileModal = ({ facultyId, onClose }: { facultyId: string 
 
   return createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm sm:p-8" role="dialog" aria-modal="true" onClick={close}>
-      <div className="mx-auto max-w-2xl animate-toast-in overflow-hidden rounded-3xl bg-white" onClick={(event) => event.stopPropagation()}>
+      <div className="mx-auto max-w-2xl animate-modal-in overflow-hidden rounded-3xl bg-white" onClick={(event) => event.stopPropagation()}>
         {detail.isPending ? (
           <div className="p-16">
             <Spinner label="Loading profile…" />

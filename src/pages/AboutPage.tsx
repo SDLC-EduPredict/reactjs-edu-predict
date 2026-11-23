@@ -1,6 +1,16 @@
-import { BrainCircuit, CheckCircle2, ClipboardList, Globe2, GraduationCap, Search, UserCheck, Video } from 'lucide-react';
+import {
+  BrainCircuit,
+  CheckCircle2,
+  ClipboardList,
+  Globe2,
+  GraduationCap,
+  Search,
+  UserCheck,
+  Video,
+} from 'lucide-react';
 import { ButtonLink } from '@/components/ui';
 import { CtaBand } from '@/components/domain/CtaBand';
+import { CountUp } from '@/components/motion/CountUp';
 import { PATHS } from '@/app/router/paths';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
 import studentImage from '@/assets/figma/about-student.webp';
@@ -29,7 +39,12 @@ const STEPS = [
   },
 ];
 
-const BENEFITS = ['AI-Driven Personalized Learning Path', 'Industry-Expert Mentorship', 'Predictive Performance Analytics', 'Career & Placement Assistance'];
+const BENEFITS = [
+  'AI-Driven Personalized Learning Path',
+  'Industry-Expert Mentorship',
+  'Predictive Performance Analytics',
+  'Career & Placement Assistance',
+];
 
 const AVATARS = [
   { initials: 'AS', className: 'bg-sun-300 text-brand-900' },
@@ -40,8 +55,22 @@ const AVATARS = [
 /** 90% semicircle gauge used on the floating “Satisfaction Rate” card. */
 const SatisfactionGauge = () => (
   <svg viewBox="0 0 100 56" className="h-12 w-24" aria-hidden="true">
-    <path d="M8 50 A42 42 0 0 1 92 50" fill="none" stroke="#eef0f6" strokeWidth="9" strokeLinecap="round" />
-    <path d="M8 50 A42 42 0 0 1 92 50" fill="none" stroke="#c6e86b" strokeWidth="9" strokeLinecap="round" strokeDasharray="132 200" pathLength={147} />
+    <path
+      d="M8 50 A42 42 0 0 1 92 50"
+      fill="none"
+      stroke="#eef0f6"
+      strokeWidth="9"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8 50 A42 42 0 0 1 92 50"
+      fill="none"
+      stroke="#c6e86b"
+      strokeWidth="9"
+      strokeLinecap="round"
+      strokeDasharray="132 200"
+      pathLength={147}
+    />
   </svg>
 );
 
@@ -57,10 +86,12 @@ const AboutPage = () => {
               <GraduationCap className="h-3.5 w-3.5" /> Who We Are
             </span>
             <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.15] text-slate-900 sm:text-5xl lg:text-[3.6rem]">
-              <span className="highlight">Transforming</span> Tech Education with <span className="text-brand-700">AI-Driven Mentorship</span>
+              <span className="highlight">Transforming</span> Tech Education with{' '}
+              <span className="text-brand-700">AI-Driven Mentorship</span>
             </h1>
             <p className="mt-6 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
-              Bridging the gap between aspiration and industry-ready skills with predictive analytics and dedicated 1-on-1 mentorship.
+              Bridging the gap between aspiration and industry-ready skills with predictive
+              analytics and dedicated 1-on-1 mentorship.
             </p>
             <ButtonLink to={PATHS.courses} className="mt-7">
               Explore Courses
@@ -72,29 +103,38 @@ const AboutPage = () => {
               ].map((stat) => (
                 <div key={stat.label}>
                   <dt className="sr-only">{stat.label}</dt>
-                  <dd className="font-display text-3xl font-semibold text-slate-900">{stat.value}</dd>
+                  <dd className="font-display text-3xl font-semibold text-slate-900">
+                    <CountUp value={stat.value} />
+                  </dd>
                   <p className="mt-1 text-xs text-slate-500">{stat.label}</p>
                 </div>
               ))}
             </dl>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md animate-fade-in pt-10 lg:max-w-none">
+          <div className="relative mx-auto w-full max-w-md animate-slide-from-right pt-10 lg:max-w-none">
             <div className="relative ml-auto w-[82%] overflow-hidden rounded-[1.75rem] bg-[#f0eefc]">
-              <img src={studentImage} alt="Smiling EDU-PREDICT student holding a laptop" className="relative z-0 mx-auto w-full object-contain" />
+              <img
+                src={studentImage}
+                alt="Smiling EDU-PREDICT student holding a laptop"
+                className="relative z-0 mx-auto w-full object-contain"
+              />
             </div>
-            <div className="absolute left-0 top-0 z-10 flex flex-col items-center rounded-2xl bg-white px-4 py-3 shadow-lift ring-1 ring-black/5 sm:left-2">
+            <div className="absolute left-0 top-0 z-10 flex animate-float flex-col items-center rounded-2xl bg-white px-4 py-3 shadow-lift ring-1 ring-black/5 sm:left-2">
               <SatisfactionGauge />
               <p className="-mt-6 font-display text-lg font-bold text-slate-900">90%</p>
               <p className="text-[11px] text-slate-500">Satisfaction Rate</p>
             </div>
-            <span className="absolute -right-2 top-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-pink-200 text-slate-900 shadow-md">
+            <span className="absolute -right-2 top-6 z-10 flex h-12 w-12 animate-float items-center justify-center rounded-full bg-pink-200 [animation-delay:-2s] text-slate-900 shadow-md">
               <Video className="h-5 w-5" />
             </span>
-            <div className="absolute -bottom-6 right-0 z-10 w-56 rounded-2xl bg-white p-4 shadow-lift ring-1 ring-black/5 sm:-right-4">
+            <div className="absolute -bottom-6 right-0 z-10 w-56 animate-float rounded-2xl [animation-delay:-4s] bg-white p-4 shadow-lift ring-1 ring-black/5 sm:-right-4">
               <div className="flex -space-x-2">
                 {AVATARS.map((avatar) => (
-                  <span key={avatar.initials} className={`flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-white ${avatar.className}`}>
+                  <span
+                    key={avatar.initials}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-white ${avatar.className}`}
+                  >
                     {avatar.initials}
                   </span>
                 ))}
@@ -102,7 +142,9 @@ const AboutPage = () => {
                   <Globe2 className="h-4 w-4" />
                 </span>
               </div>
-              <p className="mt-3 text-xs leading-relaxed text-slate-500">More than 50,000+ students enrolled around the world.</p>
+              <p className="mt-3 text-xs leading-relaxed text-slate-500">
+                More than 50,000+ students enrolled around the world.
+              </p>
             </div>
           </div>
         </div>
@@ -119,20 +161,27 @@ const AboutPage = () => {
               How <span className="text-brand-700">EDU-PREDICT</span> Works
             </h2>
             <p className="mt-3 text-sm text-slate-700">
-              A seamless 4-step workflow connecting public course discovery, structured academic tracking, and supervised Machine Learning insights.
+              A seamless 4-step workflow connecting public course discovery, structured academic
+              tracking, and supervised Machine Learning insights.
             </p>
           </div>
-          <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="reveal-stagger mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step, index) => (
-              <li key={step.title} className="flex flex-col rounded-3xl bg-white p-5 text-center shadow-card transition hover:-translate-y-1 hover:shadow-lift">
-                <div className="flex items-start justify-between">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-700 text-white">
-                    <step.icon className="h-5 w-5" />
-                  </span>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-600">Step {index + 1}</span>
+              <li key={step.title} data-reveal="">
+                <div className="group flex h-full flex-col rounded-3xl bg-white p-5 text-center shadow-card transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lift">
+                  <div className="flex items-start justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-700 text-white transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
+                      <step.icon className="h-5 w-5" />
+                    </span>
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-600">
+                      Step {index + 1}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-display text-base font-semibold text-slate-900">
+                    {step.title}
+                  </h3>
+                  <p className="mt-3 text-xs leading-relaxed text-slate-600">{step.text}</p>
                 </div>
-                <h3 className="mt-4 font-display text-base font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-3 text-xs leading-relaxed text-slate-600">{step.text}</p>
               </li>
             ))}
           </ol>
@@ -142,8 +191,18 @@ const AboutPage = () => {
       {/* About us */}
       <section className="bg-white py-20">
         <div className="container-page grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <img src={classroomImage} alt="Students learning AI tools on laptops in a classroom" loading="lazy" className="mx-auto w-full max-w-xl rounded-[1.75rem] object-cover shadow-card" />
-          <div>
+          <div
+            data-reveal="left"
+            className="group mx-auto w-full max-w-xl overflow-hidden rounded-[1.75rem] shadow-card"
+          >
+            <img
+              src={classroomImage}
+              alt="Students learning AI tools on laptops in a classroom"
+              loading="lazy"
+              className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          </div>
+          <div data-reveal="right">
             <span className="eyebrow">
               <GraduationCap className="h-3.5 w-3.5" /> About Us
             </span>
@@ -153,11 +212,16 @@ const AboutPage = () => {
               We <span className="text-brand-700">Build Future</span>
             </h2>
             <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-500">
-              At Edu-Predict, we empower students with AI-driven learning and predictive mentorship to build successful careers.
+              At Edu-Predict, we empower students with AI-driven learning and predictive mentorship
+              to build successful careers.
             </p>
-            <ul className="mt-6 space-y-3.5">
+            <ul className="reveal-stagger mt-6 space-y-3.5">
               {BENEFITS.map((item) => (
-                <li key={item} className="flex items-center gap-3 text-sm font-medium text-slate-800">
+                <li
+                  key={item}
+                  data-reveal="left"
+                  className="flex items-center gap-3 text-sm font-medium text-slate-800"
+                >
                   <CheckCircle2 className="h-5 w-5 fill-lime-brand text-white" /> {item}
                 </li>
               ))}

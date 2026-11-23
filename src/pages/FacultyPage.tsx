@@ -61,7 +61,7 @@ const FacultyPage = () => {
           {faculty.isError ? (
             <ErrorState message={getErrorMessage(faculty.error)} onRetry={() => void faculty.refetch()} />
           ) : faculty.isPending ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="reveal-stagger grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 8 }, (_, index) => (
                 <Skeleton key={index} className="h-72 rounded-3xl" />
               ))}
@@ -70,7 +70,7 @@ const FacultyPage = () => {
             <EmptyState title="No mentors found" description="Try a different name or expertise." />
           ) : (
             <>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="reveal-stagger grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {faculty.data.results.map((member) => (
                   <FacultyCard key={member.id} member={member} onView={() => setSelected(member.id)} />
                 ))}

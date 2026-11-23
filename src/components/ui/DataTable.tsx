@@ -62,11 +62,12 @@ export const DataTable = <T,>({
                   ))}
                 </tr>
               ))
-            : rows?.map((row) => (
+            : rows?.map((row, index) => (
                 <tr
                   key={rowKey(row)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  className={cn('transition-colors hover:bg-brand-50/40', onRowClick && 'cursor-pointer')}
+                  style={{ animationDelay: `${Math.min(index, 12) * 35}ms` }}
+                  className={cn('animate-page-in transition-colors duration-200 hover:bg-brand-50/50', onRowClick && 'cursor-pointer')}
                 >
                   {columns.map((column) => (
                     <td key={column.key} className={cn('px-5 py-3.5 align-middle text-slate-700', column.className)}>

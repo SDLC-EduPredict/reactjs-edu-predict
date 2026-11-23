@@ -35,7 +35,7 @@ export const LoginPage = () => {
       footer={
         <>
           Don&apos;t have an account?{' '}
-          <Link to={PATHS.register} className="font-semibold text-brand-700 hover:underline">
+          <Link to={PATHS.register} viewTransition className="font-semibold text-brand-700 hover:underline">
             Sign up
           </Link>
         </>

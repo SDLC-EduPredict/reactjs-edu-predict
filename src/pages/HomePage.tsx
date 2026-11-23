@@ -1,9 +1,18 @@
-import { ArrowRight, BrainCircuit, CalendarCheck2, CheckCircle2, LineChart, Sparkles, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  BrainCircuit,
+  CalendarCheck2,
+  CheckCircle2,
+  LineChart,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 import { ButtonLink, Button, Skeleton } from '@/components/ui';
 import { LearnersIllustration } from '@/components/domain/LearnersIllustration';
 import { CtaBand } from '@/components/domain/CtaBand';
 import { MlPreviewCard } from '@/components/domain/MlPreviewCard';
 import { SectionHeading } from '@/components/domain/SectionHeading';
+import { CountUp } from '@/components/motion/CountUp';
 import { PATHS } from '@/app/router/paths';
 import { useAppDispatch } from '@/app/store/hooks';
 import { env } from '@/config/env';
@@ -17,9 +26,21 @@ import { usePublicFaculty } from '@/features/faculty/hooks/useFaculty';
 import { useState } from 'react';
 
 const PILLARS = [
-  { icon: CalendarCheck2, title: 'Attendance Intelligence', text: 'Every session logged and converted into a live attendance percentage.' },
-  { icon: LineChart, title: 'Continuous Assessment', text: 'Assignments, mock tests and exams roll up into one performance index.' },
-  { icon: BrainCircuit, title: 'Predictive Mentorship', text: 'Linear Regression forecasts your final score before the exam does.' },
+  {
+    icon: CalendarCheck2,
+    title: 'Attendance Intelligence',
+    text: 'Every session logged and converted into a live attendance percentage.',
+  },
+  {
+    icon: LineChart,
+    title: 'Continuous Assessment',
+    text: 'Assignments, mock tests and exams roll up into one performance index.',
+  },
+  {
+    icon: BrainCircuit,
+    title: 'Predictive Mentorship',
+    text: 'Linear Regression forecasts your final score before the exam does.',
+  },
 ];
 
 const HomePage = () => {
@@ -43,11 +64,16 @@ const HomePage = () => {
               Master Engineering with <span className="highlight">Predictive AI</span> Mentorship
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600">
-              {env.instituteName} pairs industry-grade courses with a Linear Regression engine that tracks attendance, assignments and tests to forecast
-              every learner&apos;s final score — so mentors can step in early.
+              {env.instituteName} pairs industry-grade courses with a Linear Regression engine that
+              tracks attendance, assignments and tests to forecast every learner&apos;s final score
+              — so mentors can step in early.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink to={PATHS.courses} size="lg" iconRight={<ArrowRight className="h-4 w-4" />}>
+              <ButtonLink
+                to={PATHS.courses}
+                size="lg"
+                iconRight={<ArrowRight className="h-4 w-4" />}
+              >
                 Explore Courses
               </ButtonLink>
               <Button size="lg" variant="outline" onClick={() => dispatch(finderToggled(true))}>
@@ -62,17 +88,23 @@ const HomePage = () => {
               ].map((stat) => (
                 <div key={stat.label}>
                   <dt className="text-xs text-slate-500">{stat.label}</dt>
-                  <dd className="font-display text-2xl font-bold text-brand-700">{stat.value}</dd>
+                  <dd className="font-display text-2xl font-bold text-brand-700">
+                    <CountUp value={stat.value} />
+                  </dd>
                 </div>
               ))}
             </dl>
           </div>
           <div className="relative animate-fade-in">
-            <LearnersIllustration className="mx-auto max-w-md" />
-            <div className="absolute -bottom-6 left-0 hidden w-60 rounded-2xl bg-white p-4 shadow-lift ring-1 ring-black/5 sm:block">
+            <LearnersIllustration className="mx-auto max-w-md animate-float" />
+            <div className="absolute -bottom-6 left-0 hidden w-60 animate-float rounded-2xl bg-white p-4 shadow-lift ring-1 ring-black/5 [animation-delay:-3s] sm:block">
               <p className="text-[11px] font-semibold text-slate-500">Predicted final score</p>
-              <p className="font-display text-2xl font-bold text-brand-700">83.7</p>
-              <span className="mt-1 inline-block rounded-full bg-lime-soft px-2 py-0.5 text-[10px] font-bold text-lime-ink">● Good standing</span>
+              <p className="font-display text-2xl font-bold text-brand-700">
+                <CountUp value="83.7" />
+              </p>
+              <span className="mt-1 inline-block rounded-full bg-lime-soft px-2 py-0.5 text-[10px] font-bold text-lime-ink">
+                ● Good standing
+              </span>
             </div>
           </div>
         </div>
@@ -90,12 +122,18 @@ const HomePage = () => {
             }
             description="Structured, mentor-led tracks with measurable progress at every step."
           />
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="reveal-stagger mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.isPending
               ? Array.from({ length: 3 }, (_, index) => <CourseCardSkeleton key={index} />)
-              : (courses.data?.results ?? []).map((course) => <CourseCard key={course.id} course={course} />)}
+              : (courses.data?.results ?? []).map((course) => (
+                  <CourseCard key={course.id} course={course} />
+                ))}
           </div>
-          {courses.data && courses.data.results.length === 0 && <p className="mt-8 text-center text-sm text-slate-700">New courses are being published. Check back soon.</p>}
+          {courses.data && courses.data.results.length === 0 && (
+            <p className="mt-8 text-center text-sm text-slate-700">
+              New courses are being published. Check back soon.
+            </p>
+          )}
           <div className="mt-10 text-center">
             <ButtonLink to={PATHS.courses} iconRight={<ArrowRight className="h-4 w-4" />}>
               View All Courses
@@ -116,10 +154,14 @@ const HomePage = () => {
               }
               description="Academic records stop being static reports. Every mark, attendance entry and practice hour feeds a model that tells mentors who needs help — before it is too late."
             />
-            <div className="mt-8 space-y-4">
+            <div className="reveal-stagger mt-8 space-y-4">
               {PILLARS.map((pillar) => (
-                <div key={pillar.title} className="flex gap-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-700 text-white">
+                <div
+                  key={pillar.title}
+                  data-reveal="left"
+                  className="group flex gap-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100 hover:bg-white hover:shadow-card hover:ring-brand-100"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-700 text-white transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                     <pillar.icon className="h-5 w-5" />
                   </span>
                   <div>
@@ -130,7 +172,9 @@ const HomePage = () => {
               ))}
             </div>
           </div>
-          <MlPreviewCard />
+          <div data-reveal="right">
+            <MlPreviewCard />
+          </div>
         </div>
       </section>
 
@@ -145,23 +189,43 @@ const HomePage = () => {
             }
             description="Faculty who combine engineering experience with data-driven academic guidance."
             action={
-              <ButtonLink to={PATHS.faculty} variant="outline" iconRight={<Users className="h-4 w-4" />}>
+              <ButtonLink
+                to={PATHS.faculty}
+                variant="outline"
+                iconRight={<Users className="h-4 w-4" />}
+              >
                 Meet All Faculty
               </ButtonLink>
             }
           />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="reveal-stagger mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {faculty.isPending
-              ? Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-72 rounded-3xl" />)
-              : (faculty.data?.results ?? []).map((member) => <FacultyCard key={member.id} member={member} onView={() => setFacultyId(member.id)} />)}
+              ? Array.from({ length: 4 }, (_, index) => (
+                  <Skeleton key={index} className="h-72 rounded-3xl" />
+                ))
+              : (faculty.data?.results ?? []).map((member) => (
+                  <FacultyCard
+                    key={member.id}
+                    member={member}
+                    onView={() => setFacultyId(member.id)}
+                  />
+                ))}
           </div>
         </div>
       </section>
 
       <section className="py-16">
-        <div className="container-page grid gap-4 sm:grid-cols-3">
-          {['Mentor-reviewed assignments', 'Weekly mock tests', 'Early-warning academic alerts'].map((item) => (
-            <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-sm font-semibold text-slate-700">
+        <div className="reveal-stagger container-page grid gap-4 sm:grid-cols-3">
+          {[
+            'Mentor-reviewed assignments',
+            'Weekly mock tests',
+            'Early-warning academic alerts',
+          ].map((item) => (
+            <div
+              key={item}
+              data-reveal=""
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-sm font-semibold text-slate-700"
+            >
               <CheckCircle2 className="h-5 w-5 text-lime-ink" /> {item}
             </div>
           ))}

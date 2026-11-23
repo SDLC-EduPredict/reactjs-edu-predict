@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Search } from 'lucide-react';
+import { useInView } from '@/lib/hooks/useInView';
 import { cn } from '@/lib/utils/cn';
 import { initials, resolveMediaUrl } from '@/lib/utils/format';
 
@@ -93,10 +94,11 @@ export const StatCard = ({ label, value, icon, hint, tone = 'brand' }: StatCardP
 
 export const ProgressBar = ({ value, tone = 'brand', className }: { value: number; tone?: 'brand' | 'green' | 'amber' | 'rose'; className?: string }) => {
   const color = { brand: 'from-brand-600 to-brand-400', green: 'from-lime-brand to-emerald-500', amber: 'from-amber-400 to-orange-500', rose: 'from-rose-500 to-pink-500' }[tone];
-  const width = Math.max(0, Math.min(100, value));
+  const [ref, inView] = useInView<HTMLDivElement>();
+  const width = inView ? Math.max(0, Math.min(100, value)) : 0;
   return (
-    <div className={cn('h-2 w-full overflow-hidden rounded-full bg-slate-100', className)}>
-      <div className={cn('h-full rounded-full bg-gradient-to-r transition-all', color)} style={{ width: `${width}%` }} />
+    <div ref={ref} className={cn('h-2 w-full overflow-hidden rounded-full bg-slate-100', className)}>
+      <div className={cn('h-full rounded-full bg-gradient-to-r transition-[width] duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]', color)} style={{ width: `${width}%` }} />
     </div>
   );
 };
@@ -107,21 +109,68 @@ interface TabsProps<T extends string> {
   onChange: (value: T) => void;
 }
 
-export const Tabs = <T extends string>({ tabs, value, onChange }: TabsProps<T>) => (
-  <div className="inline-flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
-    {tabs.map((tab) => (
-      <button
-        key={tab.value}
-        type="button"
-        onClick={() => onChange(tab.value)}
-        className={cn(
-          'rounded-full px-3.5 py-1.5 text-xs font-semibold transition',
-          value === tab.value ? 'bg-brand-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800',
-        )}
-      >
-        {tab.label}
-        {tab.count !== undefined && <span className="ml-1.5 rounded-full bg-black/10 px-1.5 text-[10px]">{tab.count}</span>}
-      </button>
-    ))}
-  </div>
-);
+interface PillBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/** Segmented tabs with a navy pill that glides to the selected option. */
+export const Tabs = <T extends string>({ tabs, value, onChange }: TabsProps<T>) => {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [pill, setPill] = useState<PillBox | null>(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const active = list.querySelector<HTMLElement>('[aria-selected="true"]');
+        setPill(active ? { left: active.offsetLeft, top: active.offsetTop, width: active.offsetWidth, height: active.offsetHeight } : null);
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [value, tabs.length]);
+
+  return (
+    <div ref={listRef} role="tablist" className="relative inline-flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
+      {pill && (
+        <span
+          aria-hidden="true"
+          className="absolute rounded-full bg-brand-700 shadow-sm shadow-brand-700/30 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={pill}
+        />
+      )}
+      {tabs.map((tab) => {
+        const selected = value === tab.value;
+        return (
+          <button
+            key={tab.value}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            onClick={() => onChange(tab.value)}
+            className={cn(
+              'relative z-10 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors duration-200',
+              selected ? cn('text-white', !pill && 'bg-brand-700 shadow-sm') : 'text-slate-500 hover:text-slate-800',
+            )}
+          >
+            {tab.label}
+            {tab.count !== undefined && (
+              <span className={cn('ml-1.5 rounded-full px-1.5 text-[10px] transition-colors', selected ? 'bg-white/20' : 'bg-black/10')}>{tab.count}</span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+};

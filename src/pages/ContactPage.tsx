@@ -35,10 +35,10 @@ const ContactPage = () => {
             Talk to Our <span className="highlight">Admissions</span> Team
           </h1>
           <p className="mt-4 text-slate-600">Questions about courses, batches, fees or the ML prediction tool? We usually reply within one working day.</p>
-          <div className="mt-8 space-y-3">
+          <div className="reveal-stagger mt-8 space-y-3">
             {contacts.map((item) => (
-              <div key={item.label} className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-card ring-1 ring-black/5">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-white">
+              <div key={item.label} data-reveal="left" className="group flex items-center gap-4 rounded-2xl bg-white p-4 shadow-card ring-1 ring-black/5 hover:ring-brand-200">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-white transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
                   <item.icon className="h-5 w-5" />
                 </span>
                 <div>
@@ -55,7 +55,7 @@ const ContactPage = () => {
             ))}
           </div>
         </div>
-        <form onSubmit={submit} className="space-y-4 rounded-3xl bg-white p-6 shadow-card ring-1 ring-black/5 sm:p-8">
+        <form data-reveal="right" onSubmit={submit} className="space-y-4 rounded-3xl bg-white p-6 shadow-card ring-1 ring-black/5 sm:p-8">
           <h2 className="font-display text-xl font-semibold text-slate-900">Send an enquiry</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input label="Full name" required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />

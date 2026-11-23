@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Bell, LogOut, Menu, X } from 'lucide-react';
 import { env } from '@/config/env';
@@ -8,6 +8,8 @@ import { sidebarToggled } from '@/app/store/slices/uiSlice';
 import { portalLinks, type PortalKind } from '@/app/router/paths';
 import { useCurrentUser, useLogout } from '@/features/auth/hooks/useAuth';
 import { useUnreadCount } from '@/features/notifications/hooks/useNotifications';
+import { useScrollReveal } from '@/lib/hooks/useScrollReveal';
+import { useSpotlight } from '@/lib/hooks/useSpotlight';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from './BrandLogo';
 import { NAV_BY_PORTAL } from './navigation';
@@ -37,9 +39,36 @@ export const PortalLayout = ({ portal }: { portal: PortalKind }) => {
   const base = portalLinks(portal);
   const sections = NAV_BY_PORTAL[portal];
 
+  const navRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const [pill, setPill] = useState<{ top: number; height: number } | null>(null);
+  useScrollReveal(mainRef, location.pathname);
+  useSpotlight();
+
   useEffect(() => {
     dispatch(sidebarToggled(false));
   }, [location.pathname, dispatch]);
+
+  // Sliding active pill: measures the active sidebar link and glides the navy highlight to it.
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const active = nav.querySelector<HTMLElement>('a[aria-current="page"]');
+        setPill(active ? { top: active.offsetTop, height: active.offsetHeight } : null);
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(nav);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [location.pathname]);
 
   const activeItem = sections.flatMap((section) => section.items).find((item) => location.pathname.startsWith(item.to));
   const notificationsPath = base.notifications;
@@ -57,8 +86,13 @@ export const PortalLayout = ({ portal }: { portal: PortalKind }) => {
           <h1 className="hidden truncate text-sm font-bold text-slate-900 md:block">{activeItem?.label ?? 'Dashboard'}</h1>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
             <Link to={notificationsPath} className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-700" aria-label={`Notifications, ${unread} unread`}>
-              <Bell className="h-4 w-4" />
-              {unread > 0 && <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">{unread > 99 ? '99+' : unread}</span>}
+              <Bell key={unread} className={cn('h-4 w-4 origin-top', unread > 0 && 'animate-bell')} />
+              {unread > 0 && (
+                <>
+                  <span className="absolute -right-0.5 -top-0.5 h-4 w-4 animate-ping rounded-full bg-rose-400 opacity-60" aria-hidden="true" />
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">{unread > 99 ? '99+' : unread}</span>
+                </>
+              )}
             </Link>
             {user && (
               <Link to={base.profile} className="hidden items-center gap-2 rounded-full bg-brand-50 py-1 pl-1 pr-3 sm:flex">
@@ -97,7 +131,14 @@ export const PortalLayout = ({ portal }: { portal: PortalKind }) => {
             </span>
           </Link>
         )}
-        <nav className="space-y-5" aria-label="Portal">
+        <nav ref={navRef} className="relative space-y-5" aria-label="Portal">
+          {pill && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 rounded-xl bg-brand-700 shadow-md shadow-brand-700/30 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              style={pill}
+            />
+          )}
           {sections.map((section) => (
             <div key={section.title}>
               <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{section.title}</p>
@@ -110,14 +151,16 @@ export const PortalLayout = ({ portal }: { portal: PortalKind }) => {
                         to={item.to}
                         className={({ isActive }) =>
                           cn(
-                            'flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors',
-                            isActive ? 'bg-brand-700 text-white shadow-sm shadow-brand-700/30' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                            'group relative z-10 flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors duration-200',
+                            isActive
+                              ? cn('text-white', !pill && 'bg-brand-700 shadow-sm shadow-brand-700/30')
+                              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
                           )
                         }
                       >
                         {({ isActive }) => (
                           <>
-                            <item.icon className="h-4 w-4 shrink-0" />
+                            <item.icon className={cn('h-4 w-4 shrink-0 transition-transform duration-300', !isActive && 'group-hover:translate-x-0.5 group-hover:scale-110')} />
                             <span className="flex-1 truncate">{item.label}</span>
                             {badge && (
                               <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-bold', isActive ? 'bg-white/20 text-white' : badgeTone[badge.tone])}>{badge.text}</span>
@@ -135,9 +178,11 @@ export const PortalLayout = ({ portal }: { portal: PortalKind }) => {
       </aside>
 
       <div className="flex min-h-screen flex-col pt-16 lg:pl-64">
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main ref={mainRef} className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <Suspense fallback={<PageLoader />}>
-            <Outlet />
+            <div key={location.pathname} className="animate-page-in">
+              <Outlet />
+            </div>
           </Suspense>
         </main>
         <footer className="border-t border-slate-200/70 bg-white px-6 py-4 text-center text-[11px] text-slate-400">

@@ -11,7 +11,7 @@ export const Spinner = ({ className, label }: { className?: string; label?: stri
 );
 
 export const Skeleton = ({ className }: { className?: string }) => (
-  <div className={cn('animate-pulse rounded-xl bg-slate-200/70', className)} />
+  <div className={cn('skeleton-shimmer animate-shimmer rounded-xl', className)} />
 );
 
 export const PageLoader = () => (
