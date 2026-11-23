@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
-import { CheckCircle2 } from 'lucide-react';
-import { LearnersIllustration } from '@/components/domain/LearnersIllustration';
-import { BrandLogo } from '@/components/layout/BrandLogo';
+import { CheckCircle2, GraduationCap } from 'lucide-react';
+import learnersIllustration from '@/assets/figma/learners-illustration.png';
 import { cn } from '@/lib/utils/cn';
 
 interface AuthShellProps {
@@ -9,57 +8,55 @@ interface AuthShellProps {
   subtitle?: string;
   children: ReactNode;
   footer?: ReactNode;
+  /** Which side the artwork sits on (desktop). */
   illustration?: 'left' | 'right';
-  /** Optional artwork for the side panel (e.g. an image exported from the Figma design). */
+  /** Show the headline and benefit points under the artwork (registration). */
+  sideText?: boolean;
   image?: string;
 }
 
-const POINTS = ['Live attendance & coursework tracking', 'AI-predicted final scores', 'Mentor alerts before grades slip'];
+const POINTS = ['Live attendance & coursework tracking', 'AI-predicted final scores with Linear Regression', 'Mentor alerts before grades slip'];
 
-/** Framed auth card: one rounded container holding the illustration panel and the form. */
-export const AuthShell = ({ title, subtitle, children, footer, illustration = 'left', image }: AuthShellProps) => (
-  <div className="relative overflow-hidden bg-gradient-to-b from-brand-50/80 via-slate-50 to-white">
-    <div className="pointer-events-none absolute -left-32 top-10 h-80 w-80 rounded-full bg-sun-200/40 blur-3xl" />
-    <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-brand-200/40 blur-3xl" />
-    <div className="container-page relative flex min-h-[calc(100vh-4rem)] items-center py-10 sm:py-14">
-      <div className="mx-auto grid w-full max-w-6xl animate-rise overflow-hidden rounded-[2rem] bg-white shadow-[0_30px_80px_-30px_rgba(26,31,113,0.35)] ring-1 ring-brand-100 lg:grid-cols-[1.05fr_1fr]">
-        <aside
-          className={cn(
-            'relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-50 via-white to-sun-50 p-10 lg:flex',
-            illustration === 'right' ? 'lg:order-2 border-l border-brand-100' : 'border-r border-brand-100',
-          )}
-        >
-          <div className="pointer-events-none absolute inset-4 rounded-[1.5rem] border border-dashed border-brand-200/70" />
-          <div className="relative">
-            <span className="eyebrow bg-white/80">AI-Driven Academic Intelligence</span>
-            <p className="mt-4 font-display text-2xl font-semibold leading-snug text-slate-900">
-              Learn smarter with <span className="highlight">predictive</span> mentorship
+/**
+ * Auth layout from the Figma design: the artwork (and optional copy) sits freely on the page,
+ * only the form itself is framed by a bordered card.
+ */
+export const AuthShell = ({ title, subtitle, children, footer, illustration = 'left', sideText = false, image }: AuthShellProps) => (
+  <div className="relative overflow-hidden bg-gradient-to-b from-brand-50/60 via-slate-50 to-white">
+    <div className="container-page grid min-h-[calc(100vh-4rem)] items-center gap-10 py-10 sm:py-14 lg:grid-cols-2 lg:gap-16">
+      <div className={cn('hidden animate-fade-in lg:block', illustration === 'right' && 'lg:order-2')}>
+        {sideText && (
+          <div className="mb-8">
+            <span className="eyebrow">
+              <GraduationCap className="h-3.5 w-3.5" /> Join ABC Academy
+            </span>
+            <h2 className="mt-4 font-display text-3xl font-semibold leading-tight text-slate-900 xl:text-4xl">
+              Start learning with <span className="highlight">Predictive AI</span> <span className="text-brand-700">Mentorship</span>
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-500">
+              Create your profile to enrol in career-focused courses and get a real-time AI forecast of your final score.
             </p>
           </div>
-          <div className="relative my-6 flex flex-1 items-center justify-center">
-            {image ? <img src={image} alt="" className="max-h-[420px] w-full object-contain" /> : <LearnersIllustration className="max-w-md" />}
-          </div>
-          <ul className="relative space-y-2">
+        )}
+        <img src={image ?? learnersIllustration} alt="Students learning online with EDU-PREDICT" className="mx-auto w-full max-w-xl object-contain" />
+        {sideText && (
+          <ul className="mt-8 space-y-3">
             {POINTS.map((point) => (
-              <li key={point} className="flex items-center gap-2 text-sm text-slate-700">
-                <CheckCircle2 className="h-4 w-4 text-lime-ink" /> {point}
+              <li key={point} className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                <CheckCircle2 className="h-5 w-5 fill-lime-brand text-white" /> {point}
               </li>
             ))}
           </ul>
-        </aside>
-        <section className="flex flex-col justify-center px-6 py-10 sm:px-12 sm:py-14">
-          <div className="mx-auto w-full max-w-md">
-            <div className="mb-8 flex justify-center">
-              <BrandLogo />
-            </div>
-            <div className="text-center">
-              <h1 className="font-display text-3xl font-bold text-slate-900">{title}</h1>
-              {subtitle && <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">{subtitle}</p>}
-            </div>
-            <div className="mt-8">{children}</div>
-            {footer && <div className="mt-6 border-t border-slate-100 pt-6 text-center text-sm text-slate-500">{footer}</div>}
-          </div>
-        </section>
+        )}
+      </div>
+
+      <div className="mx-auto w-full max-w-lg animate-rise rounded-3xl border border-slate-200 bg-white px-6 py-9 shadow-[0_20px_60px_-30px_rgba(26,31,113,0.35)] sm:px-10 sm:py-11">
+        <div className="text-center">
+          <h1 className="font-display text-3xl font-semibold text-slate-900">{title}</h1>
+          {subtitle && <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">{subtitle}</p>}
+        </div>
+        <div className="mt-8">{children}</div>
+        {footer && <div className="mt-6 text-center text-sm text-slate-500">{footer}</div>}
       </div>
     </div>
   </div>

@@ -7,6 +7,7 @@ import { useToast } from '@/lib/hooks/useToast';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
 import { AuthShell } from '../components/AuthShell';
 import { PasswordInput } from '../components/PasswordInput';
+import { GoogleButton, OrDivider } from '../components/SocialAuth';
 import { useRegister } from '../hooks/useAuth';
 import { useServerErrors } from '../hooks/useServerErrors';
 import { PASSWORD_RULE_MESSAGE, registerSchema, type RegisterValues } from '../schemas/authSchemas';
@@ -37,12 +38,13 @@ export const RegisterPage = () => {
     <AuthShell
       title="Registration"
       illustration="right"
-      subtitle="Register to enrol in courses and track your academic performance."
+      sideText
+      subtitle="Register your profile at ABC Academy to access courses and real-time AI score prediction."
       footer={
         <>
           Already registered?{' '}
           <Link to={PATHS.login} className="font-semibold text-brand-700 hover:underline">
-            Log in
+            Sign in here
           </Link>
         </>
       }
@@ -53,12 +55,8 @@ export const RegisterPage = () => {
             <Alert tone="error">{registerMutation.error.message}</Alert>
           </div>
         )}
-        <Input label="First name" autoComplete="given-name" required {...register('first_name')} error={formState.errors.first_name?.message} />
-        <Input label="Last name" autoComplete="family-name" required {...register('last_name')} error={formState.errors.last_name?.message} />
-        <Input label="Email" type="email" autoComplete="email" required {...register('email')} error={formState.errors.email?.message} />
-        <Input label="Phone" inputMode="numeric" maxLength={10} autoComplete="tel-national" placeholder="10 digit number" required {...register('phone')} error={formState.errors.phone?.message} />
         <Select
-          label="I am registering as"
+          label="Type"
           containerClassName="sm:col-span-2"
           required
           options={[
@@ -73,11 +71,29 @@ export const RegisterPage = () => {
             <Alert tone="warning">Faculty accounts are activated after an administrator approves them.</Alert>
           </div>
         )}
-        <PasswordInput label="Password" autoComplete="new-password" required hint={PASSWORD_RULE_MESSAGE} {...register('password')} error={formState.errors.password?.message} />
-        <PasswordInput label="Confirm password" autoComplete="new-password" required {...register('confirm_password')} error={formState.errors.confirm_password?.message} />
+        <Input label="First Name" placeholder="Rahul" autoComplete="given-name" required {...register('first_name')} error={formState.errors.first_name?.message} />
+        <Input label="Last Name" placeholder="Sen" autoComplete="family-name" required {...register('last_name')} error={formState.errors.last_name?.message} />
+        <Input label="Email Address" type="email" placeholder="rahul@example.com" autoComplete="email" containerClassName="sm:col-span-2" required {...register('email')} error={formState.errors.email?.message} />
+        <PasswordInput label="Create Password" containerClassName="sm:col-span-2" autoComplete="new-password" required hint={PASSWORD_RULE_MESSAGE} {...register('password')} error={formState.errors.password?.message} />
+        <PasswordInput label="Confirm Password" containerClassName="sm:col-span-2" autoComplete="new-password" required {...register('confirm_password')} error={formState.errors.confirm_password?.message} />
+        <Input
+          label="Mobile Phone Number"
+          inputMode="numeric"
+          maxLength={10}
+          autoComplete="tel-national"
+          placeholder="98301 44521"
+          containerClassName="sm:col-span-2"
+          required
+          {...register('phone')}
+          error={formState.errors.phone?.message}
+        />
         <Button type="submit" size="lg" fullWidth className="sm:col-span-2" loading={registerMutation.isPending}>
-          Create account
+          Register Now
         </Button>
+        <div className="space-y-4 sm:col-span-2">
+          <OrDivider />
+          <GoogleButton />
+        </div>
       </form>
     </AuthShell>
   );
