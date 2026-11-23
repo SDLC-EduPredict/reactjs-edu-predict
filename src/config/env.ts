@@ -6,7 +6,7 @@ const toNumber = (value: string | undefined, fallback: number): number => {
 const stripTrailingSlash = (value: string): string => value.replace(/\/+$/, '');
 
 export const API_BASE_URL = stripTrailingSlash(
-  import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
+  import.meta.env.VITE_API_BASE_URL || 'https://django-api-server-71ti.onrender.com',
 );
 
 export const MEDIA_BASE_URL = stripTrailingSlash(import.meta.env.VITE_MEDIA_BASE_URL || API_BASE_URL);

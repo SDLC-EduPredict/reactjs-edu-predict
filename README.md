@@ -60,7 +60,7 @@ It has two portals:
 
 - Node.js **20.19+** or **22.12+** (required by Vite)
 - npm
-- The EDU-PREDICT Django backend running locally (default `http://127.0.0.1:8000`)
+- The EDU-PREDICT Django backend (default `https://django-api-server-71ti.onrender.com`)
 
 ### Installation
 
@@ -73,7 +73,7 @@ cp .env.example .env   # skip if .env is already present
 npm run dev            # http://localhost:5173
 ```
 
-Start Django on the URL set in `.env` (default `VITE_API_BASE_URL=http://127.0.0.1:8000`):
+The app talks to the API URL set in `.env` (default `VITE_API_BASE_URL=https://django-api-server-71ti.onrender.com`):
 
 ```bash
 python manage.py runserver 127.0.0.1:8000
@@ -95,8 +95,8 @@ The API base URL is read once in `src/config/env.ts` and exported as `API_BASE_U
 
 | Variable | Description | Example |
 | --- | --- | --- |
-| `VITE_API_BASE_URL` | Django server root. No trailing slash and no `/api` (endpoint paths already start with `/api/`) | `http://127.0.0.1:8000` |
-| `VITE_MEDIA_BASE_URL` | Prefix for relative `/media/...` photo and thumbnail paths | `http://127.0.0.1:8000` |
+| `VITE_API_BASE_URL` | Django server root. No trailing slash and no `/api` (endpoint paths already start with `/api/`) | `https://django-api-server-71ti.onrender.com` |
+| `VITE_MEDIA_BASE_URL` | Prefix for relative `/media/...` photo and thumbnail paths | `https://django-api-server-71ti.onrender.com` |
 | `VITE_API_TIMEOUT_MS` | Axios request timeout | `20000` |
 | `VITE_AUTH_STORAGE_KEY` | localStorage key for tokens + user | `edu_predict_auth` |
 | `VITE_TOKEN_TYPE` | Authorization header prefix | `Bearer` |
@@ -449,6 +449,31 @@ Example output: **Predicted Final Score = 83.7 / 100**, with an indicator (Excel
 | Faculty / Staff | Assigned students, attendance, marks, performance and prediction viewing |
 | Admin | Students, courses, academic records, reports and ML dashboard |
 | Super Admin | Users, roles, permissions and full system configuration |
+
+---
+
+## Deploying on Render
+
+The repo includes `render.yaml` (Blueprint) and `public/_redirects`, so it deploys as a **Static Site**.
+
+1. **Remove macOS duplicate files.** Finder creates copies such as `useAuth 2.ts`. TypeScript compiles every file under `src/`, so they break `tsc -b`. Delete them and commit:
+   ```bash
+   find . -name "* 2.*" -not -path "./node_modules/*" -delete
+   rm -rf __MACOSX
+   git add -A && git commit -m "Remove macOS duplicate files" && git push
+   ```
+   `.gitignore` now ignores `* 2.*` and `__MACOSX/` so they can't come back.
+2. **Service type:** Static Site (or New → Blueprint and pick this repo).
+   - Build command: `npm ci && npm run build`
+   - Publish directory: `dist`
+3. **Environment variables** (Vite reads them at *build* time; `.env` is not committed):
+   - `VITE_API_BASE_URL=https://django-api-server-71ti.onrender.com`
+   - `VITE_MEDIA_BASE_URL=https://django-api-server-71ti.onrender.com`
+   - `NODE_VERSION=22`
+4. **Rewrite rule:** Source `/*` → Destination `/index.html`, Action **Rewrite**. Without it, refreshing `/student/dashboard` returns 404.
+5. **Django CORS:** add the frontend URL (e.g. `https://reactjs-edu-predict.onrender.com`) to `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS` on the API service.
+
+Free Render API instances sleep when idle, so the first request after a pause can take 30–60 s.
 
 ---
 

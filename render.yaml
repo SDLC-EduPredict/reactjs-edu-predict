@@ -1,0 +1,24 @@
+# Render Blueprint — static site for the EDU-PREDICT React frontend
+services:
+  - type: web
+    name: reactjs-edu-predict
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_API_BASE_URL
+        value: https://django-api-server-71ti.onrender.com
+      - key: VITE_MEDIA_BASE_URL
+        value: https://django-api-server-71ti.onrender.com
+      - key: VITE_APP_ENV
+        value: production
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
