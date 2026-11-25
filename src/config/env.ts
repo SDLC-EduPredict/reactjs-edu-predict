@@ -13,6 +13,7 @@ export const MEDIA_BASE_URL = stripTrailingSlash(import.meta.env.VITE_MEDIA_BASE
 
 export const env = {
   appName: import.meta.env.VITE_APP_NAME || 'EDU-PREDICT',
+  siteUrl: (import.meta.env.VITE_SITE_URL || 'https://reactjs-edu-predict.onrender.com').replace(/\/$/, ''),
   appTagline:
     import.meta.env.VITE_APP_TAGLINE || 'AI-Based Student Performance & Academic Management System',
   instituteName: import.meta.env.VITE_INSTITUTE_NAME || 'ABC Academy',

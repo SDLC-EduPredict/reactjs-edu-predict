@@ -44,7 +44,7 @@ const PILLARS = [
 ];
 
 const HomePage = () => {
-  useDocumentTitle('Master Engineering with Predictive AI Mentorship');
+  useDocumentTitle('Master Engineering with Predictive AI Mentorship', 'Explore Edu-Predict for AI learning and professional IT courses. Learn Python, Django, Data Science, and Machine Learning from professionals.');
   const dispatch = useAppDispatch();
   const courses = useCourses({ page: 1, page_size: 6 });
   const categories = useCategories();
