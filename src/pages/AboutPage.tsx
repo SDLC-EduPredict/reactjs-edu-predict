@@ -56,8 +56,8 @@ const AboutPage = () => {
               <GraduationCap className="h-3.5 w-3.5" /> Who We Are
             </span>
             <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.15] text-slate-900 sm:text-5xl lg:text-[3.6rem]">
-              <span className="highlight">Transforming</span> Tech Education with{' '}
-              <span className="text-brand-700">AI-Driven Mentorship</span>
+              <span className="highlight">Empowering</span> Careers Through{' '}
+              <span className="text-brand-700">AI and Technology</span>
             </h1>
             <p className="mt-6 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
               Bridging the gap between aspiration and industry-ready skills with predictive
@@ -162,7 +162,7 @@ const AboutPage = () => {
                 </li>
               ))}
             </ul>
-            <ButtonLink to={PATHS.faculty} className="mt-8">
+            <ButtonLink to={PATHS.contact} className="mt-8">
               Know More
             </ButtonLink>
           </div>
@@ -172,7 +172,7 @@ const AboutPage = () => {
       <CtaBand
         title={
           <>
-            Ready to Start <span className="text-brand-700">Learning?</span>
+            Start Exploring <span className="text-brand-700">with Us</span>
           </>
         }
         description="At Edu-Predict, we empower students with AI-driven learning and predictive mentorship to build successful careers."

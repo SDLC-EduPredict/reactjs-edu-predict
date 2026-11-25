@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import classroomImage from '@/assets/figma/about-classroom.png';
-import { ArrowRight, CheckCircle2, GraduationCap, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, GraduationCap } from 'lucide-react';
 import { ButtonLink, Skeleton } from '@/components/ui';
 import { CtaBand } from '@/components/domain/CtaBand';
 import { StudentShowcase } from '@/components/domain/StudentShowcase';
-import { SectionHeading } from '@/components/domain/SectionHeading';
 import { CountUp } from '@/components/motion/CountUp';
 import { PATHS } from '@/app/router/paths';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
@@ -26,8 +26,8 @@ const HomePage = () => {
     'Master Engineering with Predictive AI Mentorship',
     'Explore Edu-Predict for AI learning and professional IT courses. Learn Python, Django, Data Science, and Machine Learning from professionals.',
   );
-  const courses = useCourses({ page: 1, page_size: 6 });
-  const faculty = usePublicFaculty({ page: 1, page_size: 4 });
+  const courses = useCourses({ page: 1, page_size: 4 });
+  const faculty = usePublicFaculty({ page: 1, page_size: 5 });
   const [facultyId, setFacultyId] = useState<string | null>(null);
 
   return (
@@ -70,19 +70,29 @@ const HomePage = () => {
 
       <section className="section-sun py-20">
         <div className="container-page">
-          <SectionHeading
-            align="center"
-            eyebrow="Career-Focused Programs"
-            title={
-              <>
-                Explore Our <span className="highlight-white">Career-Focused</span> Courses
-              </>
-            }
-            description="Structured, mentor-led tracks with measurable progress at every step."
-          />
-          <div className="reveal-stagger mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+            <div data-reveal="left">
+              <span className="eyebrow bg-white">
+                <GraduationCap className="h-3.5 w-3.5" /> Our Programs
+              </span>
+              <h2 className="mt-5 font-display text-3xl font-semibold leading-tight text-slate-900 sm:text-[2.75rem]">
+                Build Your Future with
+                <br />
+                <span className="text-brand-700">Emerging Technologies</span>
+              </h2>
+            </div>
+            <Link
+              to={PATHS.courses}
+              data-reveal="right"
+              className="link-underline group inline-flex items-center gap-2 text-sm font-bold text-brand-700"
+            >
+              View all courses
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+          <div className="reveal-stagger mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {courses.isPending
-              ? Array.from({ length: 3 }, (_, index) => <CourseCardSkeleton key={index} />)
+              ? Array.from({ length: 4 }, (_, index) => <CourseCardSkeleton key={index} />)
               : (courses.data?.results ?? []).map((course) => (
                   <CourseCard key={course.id} course={course} />
                 ))}
@@ -92,11 +102,6 @@ const HomePage = () => {
               New courses are being published. Check back soon.
             </p>
           )}
-          <div className="mt-10 text-center">
-            <ButtonLink to={PATHS.courses} iconRight={<ArrowRight className="h-4 w-4" />}>
-              View All Courses
-            </ButtonLink>
-          </div>
         </div>
       </section>
 
@@ -139,37 +144,29 @@ const HomePage = () => {
                 </li>
               ))}
             </ul>
-            <ButtonLink to={PATHS.about} className="mt-8">
+            <ButtonLink to={PATHS.contact} className="mt-8">
               Know More
             </ButtonLink>
           </div>
         </div>
       </section>
 
-      <section className="bg-canvas py-20">
+      <section className="bg-white py-20">
         <div className="container-page">
-          <SectionHeading
-            eyebrow="Mentors"
-            title={
-              <>
-                Learn From <span className="highlight">Industry Mentors</span>
-              </>
-            }
-            description="Faculty who combine engineering experience with data-driven academic guidance."
-            action={
-              <ButtonLink
-                to={PATHS.faculty}
-                variant="outline"
-                iconRight={<Users className="h-4 w-4" />}
-              >
-                Meet All Faculty
-              </ButtonLink>
-            }
-          />
-          <div className="reveal-stagger mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div data-reveal="" className="mx-auto max-w-4xl text-center">
+            <span className="eyebrow">
+              <GraduationCap className="h-3.5 w-3.5" /> Our Faculty
+            </span>
+            <h2 className="mt-5 font-display text-3xl font-semibold leading-tight text-slate-900 sm:text-[2.75rem]">
+              Learn From Industry Experts Who Guide
+              <br />
+              <span className="text-brand-700">Your Path</span>
+            </h2>
+          </div>
+          <div className="reveal-stagger mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {faculty.isPending
-              ? Array.from({ length: 4 }, (_, index) => (
-                  <Skeleton key={index} className="h-72 rounded-3xl" />
+              ? Array.from({ length: 5 }, (_, index) => (
+                  <Skeleton key={index} className="h-[22rem] rounded-3xl" />
                 ))
               : (faculty.data?.results ?? []).map((member) => (
                   <FacultyCard
@@ -182,41 +179,14 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="reveal-stagger container-page grid gap-4 sm:grid-cols-3">
-          {[
-            'Mentor-reviewed assignments',
-            'Weekly mock tests',
-            'Early-warning academic alerts',
-          ].map((item) => (
-            <div
-              key={item}
-              data-reveal=""
-              className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-sm font-semibold text-slate-700"
-            >
-              <CheckCircle2 className="h-5 w-5 text-lime-ink" /> {item}
-            </div>
-          ))}
-        </div>
-      </section>
-
       <CtaBand
         title={
           <>
-            Ready to Start <span className="highlight-white">Learning?</span>
+            Ready to Start <span className="text-brand-700">Learning?</span>
           </>
         }
-        description="Create your free student account, enrol in a course and watch your predicted score grow week by week."
-        action={
-          <div className="flex flex-wrap justify-center gap-3">
-            <ButtonLink to={PATHS.register} size="lg">
-              Register Now
-            </ButtonLink>
-            <ButtonLink to={PATHS.contact} size="lg" variant="outline">
-              Talk to Admissions
-            </ButtonLink>
-          </div>
-        }
+        description="At Edu-Predict, we empower students with AI-driven learning and predictive mentorship to build successful careers."
+        action={<ButtonLink to={PATHS.courses}>Browse all Courses</ButtonLink>}
       />
       <FacultyProfileModal facultyId={facultyId} onClose={() => setFacultyId(null)} />
     </>

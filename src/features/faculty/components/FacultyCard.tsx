@@ -1,32 +1,42 @@
-import { Avatar, Button } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { resolveMediaUrl } from '@/lib/utils/format';
 import type { PublicFaculty } from '../types';
 
-export const FacultyCard = ({ member, onView }: { member: PublicFaculty; onView: () => void }) => (
-  <div data-reveal="" className="h-full">
-    <article className="group flex h-full flex-col items-center rounded-3xl bg-white p-5 text-center shadow-card ring-1 ring-black/5 transition hover:-translate-y-1 hover:shadow-lift">
-      <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[10px] font-bold text-brand-700">
-        {member.course_count} course{member.course_count === 1 ? '' : 's'}
-      </span>
-      <div className="my-4 rounded-full bg-gradient-to-br from-brand-100 to-sun-100 p-1.5">
-        <Avatar
-          name={member.full_name}
-          src={member.photo}
-          size="xl"
-          className="h-20 w-20 text-2xl"
-        />
-      </div>
-      <p className="text-[11px] font-semibold text-slate-500">
-        {member.designation || 'Faculty Member'}
-      </p>
-      <h3 className="mt-1 font-display text-base font-semibold text-slate-900">
-        {member.full_name}
-      </h3>
-      <p className="mt-1 line-clamp-2 min-h-8 text-xs text-slate-500">
-        {member.expertise || 'ABC Academy mentor'}
-      </p>
-      <Button size="sm" fullWidth className="mt-4 h-9" onClick={onView}>
-        View Profile
-      </Button>
-    </article>
-  </div>
-);
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+
+export const FacultyCard = ({ member, onView }: { member: PublicFaculty; onView: () => void }) => {
+  const photo = resolveMediaUrl(member.photo);
+  return (
+    <div data-reveal="" className="h-full">
+      <article className="group relative flex h-full min-h-[22rem] flex-col overflow-hidden rounded-3xl bg-[#f0eefc] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lift">
+        <div className="flex flex-1 justify-center overflow-hidden">
+          {photo ? (
+            <img
+              src={photo}
+              alt={member.full_name}
+              loading="lazy"
+              className="h-72 w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <span className="mt-20 font-display text-6xl font-semibold text-brand-700/30 transition-transform duration-500 group-hover:scale-110">
+              {initials(member.full_name)}
+            </span>
+          )}
+        </div>
+        <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white p-4 text-center shadow-card">
+          <h3 className="truncate font-display text-base font-semibold text-slate-900">{member.full_name}</h3>
+          <p className="mt-0.5 truncate text-xs text-slate-500">{member.designation || 'Faculty Member'}</p>
+          <Button size="sm" fullWidth className="mt-3 h-9" onClick={onView}>
+            View Profile
+          </Button>
+        </div>
+      </article>
+    </div>
+  );
+};
