@@ -2,19 +2,17 @@ import {
   BrainCircuit,
   CheckCircle2,
   ClipboardList,
-  Globe2,
   GraduationCap,
   Search,
   UserCheck,
-  Video,
 } from 'lucide-react';
 import { ButtonLink } from '@/components/ui';
 import { CtaBand } from '@/components/domain/CtaBand';
+import { StudentShowcase } from '@/components/domain/StudentShowcase';
 import { CountUp } from '@/components/motion/CountUp';
 import { PATHS } from '@/app/router/paths';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
-import studentImage from '@/assets/figma/about-student.webp';
-import classroomImage from '@/assets/figma/about-classroom.webp';
+import classroomImage from '@/assets/figma/about-classroom.png';
 
 const STEPS = [
   {
@@ -45,34 +43,6 @@ const BENEFITS = [
   'Predictive Performance Analytics',
   'Career & Placement Assistance',
 ];
-
-const AVATARS = [
-  { initials: 'AS', className: 'bg-sun-300 text-brand-900' },
-  { initials: 'PR', className: 'bg-brand-200 text-brand-800' },
-  { initials: 'NK', className: 'bg-rose-200 text-rose-800' },
-];
-
-/** 90% semicircle gauge used on the floating “Satisfaction Rate” card. */
-const SatisfactionGauge = () => (
-  <svg viewBox="0 0 100 56" className="h-12 w-24" aria-hidden="true">
-    <path
-      d="M8 50 A42 42 0 0 1 92 50"
-      fill="none"
-      stroke="#eef0f6"
-      strokeWidth="9"
-      strokeLinecap="round"
-    />
-    <path
-      d="M8 50 A42 42 0 0 1 92 50"
-      fill="none"
-      stroke="#c6e86b"
-      strokeWidth="9"
-      strokeLinecap="round"
-      strokeDasharray="132 200"
-      pathLength={147}
-    />
-  </svg>
-);
 
 const AboutPage = () => {
   useDocumentTitle('About EDU-PREDICT');
@@ -112,41 +82,7 @@ const AboutPage = () => {
             </dl>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md animate-slide-from-right pt-10 lg:max-w-none">
-            <div className="relative ml-auto w-[82%] overflow-hidden rounded-[1.75rem] bg-[#f0eefc]">
-              <img
-                src={studentImage}
-                alt="Smiling EDU-PREDICT student holding a laptop"
-                className="relative z-0 mx-auto w-full object-contain"
-              />
-            </div>
-            <div className="absolute left-0 top-0 z-10 flex animate-float flex-col items-center rounded-2xl bg-white px-4 py-3 shadow-lift ring-1 ring-black/5 sm:left-2">
-              <SatisfactionGauge />
-              <p className="-mt-6 font-display text-lg font-bold text-slate-900">90%</p>
-              <p className="text-[11px] text-slate-500">Satisfaction Rate</p>
-            </div>
-            <span className="absolute -right-2 top-6 z-10 flex h-12 w-12 animate-float items-center justify-center rounded-full bg-pink-200 [animation-delay:-2s] text-slate-900 shadow-md">
-              <Video className="h-5 w-5" />
-            </span>
-            <div className="absolute -bottom-6 right-0 z-10 w-56 animate-float rounded-2xl [animation-delay:-4s] bg-white p-4 shadow-lift ring-1 ring-black/5 sm:-right-4">
-              <div className="flex -space-x-2">
-                {AVATARS.map((avatar) => (
-                  <span
-                    key={avatar.initials}
-                    className={`flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold ring-2 ring-white ${avatar.className}`}
-                  >
-                    {avatar.initials}
-                  </span>
-                ))}
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-lime-brand text-brand-950 ring-2 ring-white">
-                  <Globe2 className="h-4 w-4" />
-                </span>
-              </div>
-              <p className="mt-3 text-xs leading-relaxed text-slate-500">
-                More than 50,000+ students enrolled around the world.
-              </p>
-            </div>
-          </div>
+          <StudentShowcase />
         </div>
       </section>
 

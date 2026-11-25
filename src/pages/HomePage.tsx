@@ -1,112 +1,70 @@
-import {
-  ArrowRight,
-  BrainCircuit,
-  CalendarCheck2,
-  CheckCircle2,
-  LineChart,
-  Sparkles,
-  Users,
-} from 'lucide-react';
-import { ButtonLink, Button, Skeleton } from '@/components/ui';
-import { LearnersIllustration } from '@/components/domain/LearnersIllustration';
+import { useState } from 'react';
+import classroomImage from '@/assets/figma/about-classroom.png';
+import { ArrowRight, CheckCircle2, GraduationCap, Users } from 'lucide-react';
+import { ButtonLink, Skeleton } from '@/components/ui';
 import { CtaBand } from '@/components/domain/CtaBand';
-import { MlPreviewCard } from '@/components/domain/MlPreviewCard';
+import { StudentShowcase } from '@/components/domain/StudentShowcase';
 import { SectionHeading } from '@/components/domain/SectionHeading';
 import { CountUp } from '@/components/motion/CountUp';
 import { PATHS } from '@/app/router/paths';
-import { useAppDispatch } from '@/app/store/hooks';
-import { env } from '@/config/env';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
 import { CourseCard, CourseCardSkeleton } from '@/features/courses/components/CourseCard';
-import { useCategories, useCourses } from '@/features/courses/hooks/useCourses';
-import { finderToggled } from '@/features/courses/store/catalogSlice';
+import { useCourses } from '@/features/courses/hooks/useCourses';
 import { FacultyCard } from '@/features/faculty/components/FacultyCard';
 import { FacultyProfileModal } from '@/features/faculty/components/FacultyProfileModal';
 import { usePublicFaculty } from '@/features/faculty/hooks/useFaculty';
-import { useState } from 'react';
 
-const PILLARS = [
-  {
-    icon: CalendarCheck2,
-    title: 'Attendance Intelligence',
-    text: 'Every session logged and converted into a live attendance percentage.',
-  },
-  {
-    icon: LineChart,
-    title: 'Continuous Assessment',
-    text: 'Assignments, mock tests and exams roll up into one performance index.',
-  },
-  {
-    icon: BrainCircuit,
-    title: 'Predictive Mentorship',
-    text: 'Linear Regression forecasts your final score before the exam does.',
-  },
+const REASONS = [
+  'AI Based Support',
+  'Professional IT Courses',
+  'Student Oriented',
+  'Technical Knowledge',
 ];
 
 const HomePage = () => {
-  useDocumentTitle('Master Engineering with Predictive AI Mentorship', 'Explore Edu-Predict for AI learning and professional IT courses. Learn Python, Django, Data Science, and Machine Learning from professionals.');
-  const dispatch = useAppDispatch();
+  useDocumentTitle(
+    'Master Engineering with Predictive AI Mentorship',
+    'Explore Edu-Predict for AI learning and professional IT courses. Learn Python, Django, Data Science, and Machine Learning from professionals.',
+  );
   const courses = useCourses({ page: 1, page_size: 6 });
-  const categories = useCategories();
   const faculty = usePublicFaculty({ page: 1, page_size: 4 });
   const [facultyId, setFacultyId] = useState<string | null>(null);
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50/70 via-white to-white">
-        <div className="pointer-events-none absolute -right-40 -top-40 h-[480px] w-[480px] rounded-full bg-sun-200/40 blur-3xl" />
-        <div className="container-page relative grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
+      <section className="overflow-hidden bg-white py-14 lg:py-20">
+        <div className="container-page grid items-center gap-14 lg:grid-cols-[1.15fr_1fr]">
           <div className="animate-rise">
             <span className="eyebrow">
-              <Sparkles className="h-3.5 w-3.5" /> AI-Driven Academic Intelligence
+              <GraduationCap className="h-3.5 w-3.5" /> AI-Powered Academic Management System
             </span>
-            <h1 className="mt-5 font-display text-4xl font-bold leading-[1.15] text-slate-900 sm:text-5xl lg:text-[3.4rem]">
-              Master Engineering with <span className="highlight">Predictive AI</span> Mentorship
+            <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.15] text-slate-900 sm:text-5xl lg:text-[3.6rem]">
+              <span className="highlight">Master</span> Engineering with{' '}
+              <span className="text-brand-700">Predictive AI Mentorship</span>
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600">
-              {env.instituteName} pairs industry-grade courses with a Linear Regression engine that
-              tracks attendance, assignments and tests to forecast every learner&apos;s final score
-              — so mentors can step in early.
+            <p className="mt-6 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+              Master in-demand tech skills with intelligent learning and predictive academic
+              analytics.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink
-                to={PATHS.courses}
-                size="lg"
-                iconRight={<ArrowRight className="h-4 w-4" />}
-              >
-                Explore Courses
-              </ButtonLink>
-              <Button size="lg" variant="outline" onClick={() => dispatch(finderToggled(true))}>
-                Find My Course
-              </Button>
-            </div>
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-4">
+            <ButtonLink to={PATHS.courses} className="mt-7">
+              Explore Courses
+            </ButtonLink>
+            <dl className="mt-10 flex gap-12">
               {[
-                { label: 'Courses', value: courses.data?.count ?? '—' },
-                { label: 'Disciplines', value: categories.data?.length ?? '—' },
-                { label: 'Mentors', value: faculty.data?.count ?? '—' },
+                { value: '120+', label: 'Countries Reached' },
+                { value: '600+', label: 'Courses Available' },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <dt className="text-xs text-slate-500">{stat.label}</dt>
-                  <dd className="font-display text-2xl font-bold text-brand-700">
+                  <dt className="sr-only">{stat.label}</dt>
+                  <dd className="font-display text-3xl font-semibold text-slate-900">
                     <CountUp value={stat.value} />
                   </dd>
+                  <p className="mt-1 text-xs text-slate-500">{stat.label}</p>
                 </div>
               ))}
             </dl>
           </div>
-          <div className="relative animate-fade-in">
-            <LearnersIllustration className="mx-auto max-w-md animate-float" />
-            <div className="absolute -bottom-6 left-0 hidden w-60 animate-float rounded-2xl bg-white p-4 shadow-lift ring-1 ring-black/5 [animation-delay:-3s] sm:block">
-              <p className="text-[11px] font-semibold text-slate-500">Predicted final score</p>
-              <p className="font-display text-2xl font-bold text-brand-700">
-                <CountUp value="83.7" />
-              </p>
-              <span className="mt-1 inline-block rounded-full bg-lime-soft px-2 py-0.5 text-[10px] font-bold text-lime-ink">
-                ● Good standing
-              </span>
-            </div>
-          </div>
+          <StudentShowcase />
         </div>
       </section>
 
@@ -142,38 +100,48 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="container-page grid items-center gap-12 lg:grid-cols-2">
-          <div>
-            <SectionHeading
-              eyebrow="Why EDU-PREDICT"
-              title={
-                <>
-                  We Don&apos;t Just Teach, <span className="highlight">We Build Future</span>
-                </>
-              }
-              description="Academic records stop being static reports. Every mark, attendance entry and practice hour feeds a model that tells mentors who needs help — before it is too late."
+      <section className="bg-white py-20">
+        <div className="container-page grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <div
+            data-reveal="left"
+            className="group mx-auto w-full max-w-xl overflow-hidden rounded-[1.75rem] shadow-card"
+          >
+            <img
+              src={classroomImage}
+              alt="Students learning AI tools on laptops in a classroom"
+              loading="lazy"
+              width={1393}
+              height={1264}
+              className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="reveal-stagger mt-8 space-y-4">
-              {PILLARS.map((pillar) => (
-                <div
-                  key={pillar.title}
-                  data-reveal="left"
-                  className="group flex gap-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100 hover:bg-white hover:shadow-card hover:ring-brand-100"
-                >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-700 text-white transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
-                    <pillar.icon className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="font-semibold text-slate-900">{pillar.title}</p>
-                    <p className="text-sm text-slate-500">{pillar.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
           <div data-reveal="right">
-            <MlPreviewCard />
+            <span className="eyebrow">
+              <GraduationCap className="h-3.5 w-3.5" /> About Us
+            </span>
+            <h2 className="mt-5 font-display text-3xl font-semibold leading-tight text-slate-900 sm:text-4xl">
+              Why Should Students Choose
+              <br />
+              <span className="text-brand-700">Edu Predict?</span>
+            </h2>
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-500">
+              Edu-Predict is a unique platform that provides AI-based academic assistance,
+              student-oriented learning and professional IT education.
+            </p>
+            <ul className="reveal-stagger mt-6 space-y-3.5">
+              {REASONS.map((item) => (
+                <li
+                  key={item}
+                  data-reveal="left"
+                  className="flex items-center gap-3 text-sm font-medium text-slate-800"
+                >
+                  <CheckCircle2 className="h-5 w-5 fill-lime-brand text-white" /> {item}
+                </li>
+              ))}
+            </ul>
+            <ButtonLink to={PATHS.about} className="mt-8">
+              Know More
+            </ButtonLink>
           </div>
         </div>
       </section>
