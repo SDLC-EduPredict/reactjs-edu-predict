@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /student/
 Disallow: /faculty-portal/
-Disallow: /admin/
+Disallow: /admin/dashboard
+Disallow: /student/dashboard
 
 Sitemap: https://reactjs-edu-predict.onrender.com/sitemap.xml
