@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button, Card, ConfirmDialog, DataTable, Input, Modal, PageHeader, Pagination, SearchInput, Select, Skeleton, StatusBadge, Textarea } from '@/components/ui';
 import { CourseArt } from '@/components/domain/CourseArt';
+import { ThumbnailPicker } from '@/components/domain/ThumbnailPicker';
 import { useAppDispatch } from '@/app/store/hooks';
 import { useDocumentTitle } from '@/lib/hooks/useDocumentTitle';
 import { useListFilter } from '@/lib/hooks/useListFilter';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
+import type { ImageInput } from '@/lib/utils/image';
 import { useAdminFaculty } from '@/features/faculty/hooks/useFaculty';
 import { useAdminCategories, useAdminCourse, useAdminCourses, useCreateCourse, useDeleteCourse, useUpdateCourse } from '../hooks/useCourses';
 import { coursePreviewOpened } from '../store/catalogSlice';
 import { COURSE_LEVELS, COURSE_MODES, COURSE_STATUSES, type Course, type CourseLevel, type CourseMode, type CoursePayload, type CourseStatus } from '../types';
 
-interface Values extends Omit<CoursePayload, 'category' | 'faculty'> {
+interface Values extends Omit<CoursePayload, 'category' | 'faculty' | 'thumbnail'> {
   category: string;
   faculty: string;
 }
@@ -43,7 +45,9 @@ const CourseFormModal = ({ open, id, onClose }: { open: boolean; id: number | nu
   const faculty = useAdminFaculty({ page: 1, page_size: 100, is_active: 'true' }, open);
   const create = useCreateCourse();
   const update = useUpdateCourse();
-  const { register, handleSubmit, reset, setValue, getValues } = useForm<Values>({ defaultValues: EMPTY });
+  const [thumbnail, setThumbnail] = useState<ImageInput>(null);
+  const { register, handleSubmit, reset, setValue, getValues, control } = useForm<Values>({ defaultValues: EMPTY });
+  const [title, categoryId] = useWatch({ control, name: ['title', 'category'] });
 
   useEffect(() => {
     if (id === null) reset(EMPTY);
@@ -70,7 +74,7 @@ const CourseFormModal = ({ open, id, onClose }: { open: boolean; id: number | nu
   }, [id, detail.data, reset]);
 
   const submit = handleSubmit((values) => {
-    const payload: CoursePayload = { ...values, category: Number(values.category), faculty: values.faculty || null, duration_weeks: Number(values.duration_weeks), total_modules: Number(values.total_modules) };
+    const payload: CoursePayload = { ...values, category: Number(values.category), faculty: values.faculty || null, duration_weeks: Number(values.duration_weeks), total_modules: Number(values.total_modules), thumbnail };
     if (id === null) create.mutate(payload, { onSuccess: onClose });
     else update.mutate({ id, ...payload }, { onSuccess: onClose });
   });
@@ -117,6 +121,14 @@ const CourseFormModal = ({ open, id, onClose }: { open: boolean; id: number | nu
           <Input label="Duration (weeks)" type="number" min={1} {...register('duration_weeks')} />
           <Input label="Total modules" type="number" min={1} {...register('total_modules')} />
           <Input label="Fee (₹)" type="number" min={0} step="0.01" {...register('fee')} />
+          <ThumbnailPicker
+            className="md:col-span-3"
+            title={title}
+            category={(categories.data ?? []).find((c) => String(c.id) === categoryId)?.name}
+            current={id !== null ? (detail.data?.thumbnail ?? null) : null}
+            value={thumbnail}
+            onChange={setThumbnail}
+          />
           <Textarea label="Short description" rows={2} containerClassName="md:col-span-3" {...register('short_description', { required: true })} />
           <Textarea label="Full description" rows={4} containerClassName="md:col-span-3" {...register('description')} />
           <Input label="SEO title" containerClassName="md:col-span-3" {...register('meta_title')} />
@@ -192,7 +204,7 @@ const AdminCoursesPage = () => {
         />
         <Pagination page={list.page} pageSize={list.pageSize} count={courses.data?.count ?? 0} onPageChange={list.setPage} />
       </Card>
-      <CourseFormModal open={form.open} id={form.id} onClose={() => setForm({ open: false, id: null })} />
+      <CourseFormModal key={`${form.open}-${form.id ?? 'new'}`} open={form.open} id={form.id} onClose={() => setForm({ open: false, id: null })} />
       <ConfirmDialog
         open={target !== null}
         title="Delete course?"

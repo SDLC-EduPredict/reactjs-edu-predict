@@ -1,4 +1,5 @@
 import type { Course } from '@/features/courses/types';
+import type { ImageInput } from '@/lib/utils/image';
 import type { ListParams, User } from '@/types';
 
 export interface FacultyProfile {
@@ -46,6 +47,7 @@ export interface CreateFacultyPayload {
   designation: string;
   expertise: string;
   bio: string;
+  photo?: ImageInput;
 }
 
 export interface UpdateFacultyPayload {
@@ -56,5 +58,5 @@ export interface UpdateFacultyPayload {
   designation?: string;
   expertise?: string;
   bio?: string;
-  photo?: File | null;
+  photo?: ImageInput;
 }

@@ -1,3 +1,4 @@
+import type { ImageInput } from '@/lib/utils/image';
 import type { CategoryRef, FacultyRef, ListParams } from '@/types';
 
 export type CourseLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
@@ -103,4 +104,5 @@ export interface CoursePayload {
   status: CourseStatus;
   meta_title: string;
   meta_description: string;
+  thumbnail?: ImageInput;
 }

@@ -1,5 +1,6 @@
 import { ENDPOINTS } from '@/lib/api/endpoints';
 import { api } from '@/lib/api/request';
+import { withBase64Image } from '@/lib/utils/image';
 import type { Paginated, QueryParams } from '@/types';
 import type {
   CategoriesData,
@@ -26,8 +27,9 @@ export const adminCatalogApi = {
   deleteCategory: (id: number) => api.delete(ENDPOINTS.admin.category(id)),
   courses: (params: CourseListParams) => api.get<Paginated<Course>>(ENDPOINTS.admin.courses, params as QueryParams),
   course: (id: number) => api.get<CourseData>(ENDPOINTS.admin.course(id)),
-  createCourse: (payload: CoursePayload) => api.post<CourseData, CoursePayload>(ENDPOINTS.admin.courses, payload),
-  updateCourse: ({ id, ...payload }: Partial<CoursePayload> & { id: number }) =>
-    api.patch<CourseData>(ENDPOINTS.admin.course(id), payload),
+  createCourse: async (payload: CoursePayload) =>
+    api.post<CourseData>(ENDPOINTS.admin.courses, await withBase64Image(payload, 'thumbnail')),
+  updateCourse: async ({ id, ...payload }: Partial<CoursePayload> & { id: number }) =>
+    api.patch<CourseData>(ENDPOINTS.admin.course(id), await withBase64Image(payload, 'thumbnail')),
   deleteCourse: (id: number) => api.delete(ENDPOINTS.admin.course(id)),
 };

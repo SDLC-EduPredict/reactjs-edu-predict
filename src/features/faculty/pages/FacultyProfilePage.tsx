@@ -39,7 +39,7 @@ const ProfileForm = ({ profile }: { profile: FacultyProfile }) => {
       <Card className="overflow-hidden">
         <div className="h-24 bg-gradient-to-r from-brand-700 via-brand-600 to-lime-brand" />
         <CardBody className="-mt-14 text-center">
-          <PhotoPicker name={profile.user.full_name} current={profile.photo} onChange={setPhoto} />
+          <PhotoPicker key={profile.updated_at} name={profile.user.full_name} current={profile.photo} onChange={setPhoto} />
           <h2 className="mt-3 font-display text-lg font-semibold text-slate-900">{profile.user.full_name}</h2>
           <p className="text-xs font-semibold text-brand-700">{profile.designation || 'Faculty Member'}</p>
           <p className="mt-1 text-[11px] text-slate-500">{profile.employee_code}</p>

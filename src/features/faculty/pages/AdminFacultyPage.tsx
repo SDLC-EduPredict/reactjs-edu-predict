@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2, Pencil, Plus, UserX } from 'lucide-react';
 import { Avatar, Button, Card, ConfirmDialog, DataTable, Input, Modal, PageHeader, Pagination, SearchInput, Skeleton, StatusBadge, Switch, Tabs, Textarea } from '@/components/ui';
@@ -30,14 +30,16 @@ const FacultyFormModal = ({ open, id, onClose }: { open: boolean; id: number | n
   const create = useCreateFaculty();
   const update = useUpdateFaculty();
   const [photo, setPhoto] = useState<File | null>(null);
-  const { register, handleSubmit, reset } = useForm<Values>({ defaultValues: EMPTY });
+  const { register, handleSubmit, reset, control } = useForm<Values>({ defaultValues: EMPTY });
+  const [firstName, lastName] = useWatch({ control, name: ['first_name', 'last_name'] });
+  const newName = `${firstName} ${lastName}`.trim() || 'New faculty';
   useEffect(() => {
     if (id === null) reset(EMPTY);
     else if (detail.data) reset(fromProfile(detail.data));
   }, [id, detail.data, reset]);
 
   const submit = handleSubmit(({ email, password, is_active, ...rest }) => {
-    if (id === null) create.mutate({ email, password, ...rest }, { onSuccess: onClose });
+    if (id === null) create.mutate({ email, password, ...rest, photo }, { onSuccess: onClose });
     else update.mutate({ id, is_active, ...rest, ...(photo ? { photo } : {}) }, { onSuccess: onClose });
   });
 
@@ -63,9 +65,15 @@ const FacultyFormModal = ({ open, id, onClose }: { open: boolean; id: number | n
         <Skeleton className="h-72 w-full" />
       ) : (
         <form id="faculty-form" onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
+          {id === null && (
+            <div className="flex items-center gap-4 rounded-2xl bg-brand-50 p-4 sm:col-span-2">
+              <PhotoPicker name={newName} current={null} onChange={setPhoto} />
+              <p className="text-xs text-slate-500">Optional profile photo. JPG, PNG, WEBP or GIF up to 2 MB.</p>
+            </div>
+          )}
           {id !== null && detail.data && (
             <div className="flex items-center gap-4 rounded-2xl bg-brand-50 p-4 sm:col-span-2">
-              <PhotoPicker name={detail.data.user.full_name} current={detail.data.photo} onChange={setPhoto} />
+              <PhotoPicker key={`${id}-${detail.data.updated_at}`} name={detail.data.user.full_name} current={detail.data.photo} onChange={setPhoto} />
               <div className="text-xs text-slate-500">
                 <p>Joined {formatDate(detail.data.created_at)}</p>
                 <p>Last login {formatDate(detail.data.user.last_login, true)}</p>
