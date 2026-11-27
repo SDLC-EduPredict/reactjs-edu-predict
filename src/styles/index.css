@@ -1,4 +1,8 @@
 @import 'tailwindcss';
+@import './theme.css';
+
+/* `dark:` utilities follow the .dark class set by the theme switch, not only the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: 'Mulish', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -246,3 +250,4 @@
 .reveal-stagger > :nth-child(6) { --reveal-delay: 450ms; }
 .reveal-stagger > :nth-child(7) { --reveal-delay: 540ms; }
 .reveal-stagger > :nth-child(n + 8) { --reveal-delay: 600ms; }
+

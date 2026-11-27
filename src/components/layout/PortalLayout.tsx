@@ -12,6 +12,7 @@ import { useScrollReveal } from '@/lib/hooks/useScrollReveal';
 import { useSpotlight } from '@/lib/hooks/useSpotlight';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from './BrandLogo';
+import { ThemeToggle } from './ThemeToggle';
 import { NAV_BY_PORTAL } from './navigation';
 import { usePortalBadges, type BadgeTone } from './usePortalBadges';
 
@@ -85,6 +86,7 @@ export const PortalLayout = ({ portal }: { portal: PortalKind }) => {
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3 pr-4 lg:pr-6">
           <h1 className="hidden truncate text-sm font-bold text-slate-900 md:block">{activeItem?.label ?? 'Dashboard'}</h1>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <ThemeToggle className="hidden sm:grid" />
             <Link to={notificationsPath} className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-brand-50 hover:text-brand-700" aria-label={`Notifications, ${unread} unread`}>
               <Bell key={unread} className={cn('h-4 w-4 origin-top', unread > 0 && 'animate-bell')} />
               {unread > 0 && (

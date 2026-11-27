@@ -19,7 +19,7 @@ export const ScoreGauge = ({ score, max = 100, label = 'Predicted score', size =
   return (
     <div className={cn('flex flex-col items-center', className)} style={{ width: size }}>
       <svg viewBox="0 0 180 110" width={size} height={(size * 110) / 180} role="img" aria-label={`${label}: ${value ?? 'not available'}`}>
-        <path d="M20 95 A70 70 0 0 1 160 95" fill="none" stroke={dark ? 'rgba(255,255,255,0.15)' : '#e2e8f0'} strokeWidth="14" strokeLinecap="round" />
+        <path d="M20 95 A70 70 0 0 1 160 95" fill="none" style={{ stroke: dark ? 'rgba(255,255,255,0.15)' : 'var(--color-slate-200)' }} strokeWidth="14" strokeLinecap="round" />
         <path
           d="M20 95 A70 70 0 0 1 160 95"
           fill="none"
@@ -30,10 +30,10 @@ export const ScoreGauge = ({ score, max = 100, label = 'Predicted score', size =
           strokeDashoffset={circumference * (1 - ratio)}
           style={{ transition: 'stroke-dashoffset 700ms ease' }}
         />
-        <text x="90" y="82" textAnchor="middle" fill={dark ? '#ffffff' : '#0f172a'} style={{ fontSize: 30, fontWeight: 700, fontFamily: 'Roboto Slab, serif' }}>
+        <text x="90" y="82" textAnchor="middle" style={{ fill: dark ? '#ffffff' : 'var(--color-slate-900)', fontSize: 30, fontWeight: 700, fontFamily: 'Roboto Slab, serif' }}>
           {value === null ? '—' : value.toFixed(1)}
         </text>
-        <text x="90" y="102" textAnchor="middle" fill={dark ? 'rgba(255,255,255,0.6)' : '#94a3b8'} style={{ fontSize: 11, fontWeight: 600 }}>
+        <text x="90" y="102" textAnchor="middle" style={{ fill: dark ? 'rgba(255,255,255,0.6)' : 'var(--color-slate-400)', fontSize: 11, fontWeight: 600 }}>
           / {max}
         </text>
       </svg>

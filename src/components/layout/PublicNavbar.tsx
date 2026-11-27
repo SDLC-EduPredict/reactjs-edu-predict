@@ -8,6 +8,7 @@ import { homePathForRole, PATHS } from '@/app/router/paths';
 import { useCurrentUser } from '@/features/auth/hooks/useAuth';
 import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from './BrandLogo';
+import { ThemeToggle } from './ThemeToggle';
 import { UserMenu } from './UserMenu';
 
 const LINKS = [
@@ -121,6 +122,7 @@ export const PublicNavbar = () => {
           />
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle className="hidden md:grid" />
           {isAuthenticated ? (
             <>
               <ButtonLink to={homePathForRole(role)} size="sm" className="hidden sm:inline-flex" icon={<LayoutDashboard className="h-4 w-4" />}>
@@ -169,6 +171,10 @@ export const PublicNavbar = () => {
               </NavLink>
             ))}
           </nav>
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 md:hidden">
+            <span className="text-xs font-semibold text-slate-500">Theme</span>
+            <ThemeToggle showLabels />
+          </div>
           {!isAuthenticated && (
             <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
               <ButtonLink to={PATHS.login} variant="outline" viewTransition>

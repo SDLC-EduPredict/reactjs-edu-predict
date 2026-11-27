@@ -21,7 +21,13 @@ import {
 import { CHART_COLORS } from './chartColors';
 
 const axisProps = { tick: { fontSize: 11, fill: '#64748b' }, axisLine: false, tickLine: false } as const;
-const tooltipStyle = { borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 } as const;
+const tooltipStyle = {
+  borderRadius: 12,
+  border: '1px solid var(--color-slate-200)',
+  background: 'var(--surface, #fff)',
+  color: 'var(--color-slate-800)',
+  fontSize: 12,
+} as const;
 
 export interface SeriesDef {
   key: string;
@@ -43,7 +49,7 @@ export const SimpleBarChart = ({ data, xKey, series, height = 260, domain }: Car
       <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" vertical={false} />
       <XAxis dataKey={xKey} {...axisProps} interval={0} />
       <YAxis {...axisProps} domain={domain} />
-      <Tooltip contentStyle={tooltipStyle} cursor={{ fill: '#f0eefc' }} />
+      <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--color-brand-50)' }} />
       {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
       {series.map((item, index) => (
         <Bar key={item.key} dataKey={item.key} name={item.label} fill={item.color ?? CHART_COLORS[index % CHART_COLORS.length]} radius={[8, 8, 0, 0]} maxBarSize={34} />

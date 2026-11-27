@@ -1,0 +1,186 @@
+/* ------------------------------------------------------------------ */
+/* Dark theme                                                          */
+/* ------------------------------------------------------------------ */
+/* lib/theme/theme.ts puts `.dark` on <html> (System / Light / Dark switch in the navbar).
+   The site is styled with Tailwind's slate scale and a few brand tints, so dark mode works by
+   re-pointing those tokens instead of adding dark: classes to every component. New code can
+   still use `dark:` utilities (see the @custom-variant in index.css). */
+
+.dark {
+  color-scheme: dark;
+
+  --color-page: #0b0e24;
+  --color-canvas: #0d1129;
+  --surface: #141938;
+  --surface-raised: #1a2046;
+  --brand-ink: #c4c0f8;
+  --brand-tint: #232862;
+
+  /* Slate runs the other way: light text, dark surfaces. 950 stays dark for modal backdrops. */
+  --color-slate-50: #111633;
+  --color-slate-100: #1b2045;
+  --color-slate-200: #282e5a;
+  --color-slate-300: #3a4176;
+  --color-slate-400: #8a90b6;
+  --color-slate-500: #a2a8c8;
+  --color-slate-600: #b8bdd9;
+  --color-slate-700: #ced2e8;
+  --color-slate-800: #e0e3f2;
+  --color-slate-900: #f2f4fc;
+
+  --color-brand-50: #1e2357;
+  --color-brand-100: #262b66;
+  --color-brand-200: #343a80;
+  /* Primary buttons are brightened so they stand out on the dark page. */
+  --color-brand-700: #3b41b5;
+  --color-brand-800: #2f3499;
+  --toggle-thumb: #2e3478;
+
+  /* Status tints: dark wash backgrounds, light text. */
+  --color-lime-soft: #1f3317;
+  --color-lime-ink: #bfe78a;
+  --color-emerald-50: #0f2a25;
+  --color-emerald-100: #133a31;
+  --color-emerald-700: #6ee7b7;
+  --color-emerald-800: #a7f3d0;
+  --color-green-50: #10291b;
+  --color-green-100: #143823;
+  --color-green-700: #86efac;
+  --color-rose-50: #33141f;
+  --color-rose-100: #451a29;
+  --color-rose-700: #fda4af;
+  --color-red-50: #331417;
+  --color-red-100: #451a1e;
+  --color-red-700: #fca5a5;
+  --color-amber-50: #33260b;
+  --color-amber-100: #45330e;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+  --color-orange-50: #33200e;
+  --color-orange-100: #452a12;
+  --color-orange-700: #fdba74;
+  --color-sky-50: #0c2635;
+  --color-sky-100: #103347;
+  --color-sky-700: #7dd3fc;
+  --color-blue-50: #121f3d;
+  --color-blue-100: #172a54;
+  --color-blue-700: #93c5fd;
+  --color-indigo-50: #191c45;
+  --color-indigo-100: #20255a;
+  --color-indigo-700: #a5b4fc;
+  --color-violet-50: #221a45;
+  --color-violet-100: #2c2160;
+  --color-violet-700: #c4b5fd;
+  --color-sun-100: #3a3014;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 22px -10px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 24px 48px -22px rgb(0 0 0 / 0.75);
+}
+
+/* Yellow and lime fills stay bright in dark mode, so text on them keeps the light palette. */
+.dark :is(.highlight, .bg-sun-200, .bg-sun-300, .bg-sun-400, .bg-sun-500, .bg-lime-brand) {
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --brand-ink: #1a1f71;
+}
+.dark .highlight {
+  color: #0f172a;
+}
+
+@layer utilities {
+  /* White surfaces become the dark surface; :where() keeps specificity equal so hover: still wins. */
+  :where(.dark) .bg-white {
+    background-color: var(--surface);
+  }
+  :where(.dark) :is(.bg-white\/70, .bg-white\/80, .bg-white\/85, .bg-white\/90, .bg-white\/95) {
+    background-color: color-mix(in oklab, var(--color-page) 88%, transparent);
+  }
+  :where(.dark) .to-white {
+    --tw-gradient-to: var(--color-page);
+  }
+  :where(.dark) .from-white {
+    --tw-gradient-from: var(--color-page);
+  }
+  :where(.dark) :is(.bg-\[\#f0eefc\], .bg-brand-50) {
+    background-color: var(--brand-tint);
+  }
+  :where(.dark) .from-\[\#f0eefc\] {
+    --tw-gradient-from: #151a45;
+  }
+  :where(.dark) :is(.text-brand-600, .text-brand-700, .text-brand-800, .text-brand-900, .text-brand-950) {
+    color: var(--brand-ink);
+  }
+  :where(.dark) .ring-white {
+    --tw-ring-color: var(--surface);
+  }
+  :where(.dark) .ring-black\/5 {
+    --tw-ring-color: rgb(255 255 255 / 0.06);
+  }
+}
+
+.dark .eyebrow {
+  background-color: var(--brand-tint);
+  color: var(--brand-ink);
+}
+.dark .accent {
+  color: var(--brand-ink);
+}
+
+/* Yellow bands turn into a deep indigo with a warm glow; the yellow stays in highlights and buttons. */
+.dark .section-sun {
+  background:
+    radial-gradient(40rem 16rem at 50% 0%, rgb(249 213 110 / 0.12), transparent 70%),
+    linear-gradient(180deg, #121738 0%, #0f1330 100%);
+}
+.dark .section-sun .eyebrow,
+.dark .section-sun .bg-white.eyebrow {
+  background-color: rgb(249 213 110 / 0.14);
+  color: var(--color-sun-300);
+}
+
+/* Navy panels sit a little brighter than the page so they still read as panels. */
+.dark .navy-panel {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+/* Recharts draws with SVG attributes, so its greys are recoloured here. */
+.dark .recharts-cartesian-grid line {
+  stroke: var(--color-slate-200);
+}
+.dark .recharts-text,
+.dark .recharts-polar-angle-axis-tick text {
+  fill: var(--color-slate-500);
+}
+.dark .recharts-polar-grid line,
+.dark .recharts-polar-grid path {
+  stroke: var(--color-slate-200);
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.04) 25%, rgb(255 255 255 / 0.09) 37%, rgb(255 255 255 / 0.04) 63%);
+  background-size: 400% 100%;
+}
+
+.dark ::-webkit-scrollbar-track { background: #0b0e24; }
+.dark ::-webkit-scrollbar-thumb { background: #2a3060; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #3a4176; }
+
+/* Native form controls and autofill */
+.dark select option {
+  background-color: var(--surface);
+  color: var(--color-slate-900);
+}
+.dark input:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-slate-900);
+  box-shadow: 0 0 0 1000px var(--surface) inset;
+}
+
+/* Theme switch: the new theme grows as a circle from the clicked button (see setThemePreference). */
+.theme-transition::view-transition-old(root),
+.theme-transition::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
