@@ -20,7 +20,7 @@ const PAGES = [
     path: '/',
     title: 'Edu Predict – Upgrade Your Skills & Build Your Career',
     description: 'Explore Edu-Predict for AI learning and professional IT courses. Learn Python, Django, Data Science, and Machine Learning from professionals.',
-    h1: 'Master Engineering with Predictive AI Mentorship',
+    h1: 'Explore AI, Machine Learning, Python and Data Science',
     text: 'Master in-demand tech skills with intelligent learning and predictive academic analytics.',
   },
   {

@@ -23,7 +23,7 @@ const REASONS = [
 
 const HomePage = () => {
   useDocumentTitle(
-    'Master Engineering with Predictive AI Mentorship',
+    'Explore AI, Machine Learning, Python and Data Science',
     'Explore Edu-Predict for AI learning and professional IT courses. Learn Python, Django, Data Science, and Machine Learning from professionals.',
   );
   const courses = useCourses({ page: 1, page_size: 4 });
