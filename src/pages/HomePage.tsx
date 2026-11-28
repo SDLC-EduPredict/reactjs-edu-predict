@@ -52,7 +52,7 @@ const HomePage = () => {
             <dl className="mt-10 flex gap-12">
               {[
                 { value: '120+', label: 'Countries Reached' },
-                { value: '600+', label: 'Courses Available' },
+                { value: '600+', label: 'Students Placed' },
               ].map((stat) => (
                 <div key={stat.label}>
                   <dt className="sr-only">{stat.label}</dt>
