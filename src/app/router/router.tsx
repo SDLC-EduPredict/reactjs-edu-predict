@@ -5,17 +5,19 @@ import { PublicLayout } from '@/components/layout/PublicLayout';
 import { PortalLayout } from '@/components/layout/PortalLayout';
 import { ADMIN_ROLES, type UserRole } from '@/types';
 import { GuestOnly, RequireAuth, RequireRole } from './guards';
+// The six public marketing pages are bundled up front, not lazy-loaded. Their <h1> and copy are
+// then in React's very first render, so SEO crawlers and audit tools never catch a loading spinner.
+import HomePage from '@/pages/HomePage';
+import AboutPage from '@/pages/AboutPage';
+import CoursesPage from '@/pages/CoursesPage';
+import CategoriesPage from '@/pages/CategoriesPage';
+import FacultyPage from '@/pages/FacultyPage';
+import ContactPage from '@/pages/ContactPage';
 import { RootShell } from './RootShell';
 import { PATHS, type PortalKind } from './paths';
 
 // Public
-const HomePage = lazy(() => import('@/pages/HomePage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const CoursesPage = lazy(() => import('@/pages/CoursesPage'));
 const CourseDetailPage = lazy(() => import('@/pages/CourseDetailPage'));
-const CategoriesPage = lazy(() => import('@/pages/CategoriesPage'));
-const FacultyPage = lazy(() => import('@/pages/FacultyPage'));
-const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 // Auth
